@@ -40,7 +40,25 @@ namespace workflow
 
     public class screenConstructor
     {
+        public static void changeBoxes(System.Windows.Forms.Panel prevBox, System.Windows.Forms.GroupBox nextBox)
+        {
+            prevBox.Visible = false;
+            nextBox.Visible = true;
+        }
+
+        public static void changeBoxes(System.Windows.Forms.Panel prevBox, System.Windows.Forms.Panel nextBox)
+        {
+            prevBox.Visible = false;
+            nextBox.Visible = true;
+        }
+
         public static void changeBoxes(System.Windows.Forms.GroupBox prevBox, System.Windows.Forms.GroupBox nextBox)
+        {
+            prevBox.Visible = false;
+            nextBox.Visible = true;
+        }
+
+        public static void changeBoxes(System.Windows.Forms.GroupBox prevBox, System.Windows.Forms.Panel nextBox)
         {
             prevBox.Visible = false;
             nextBox.Visible = true;

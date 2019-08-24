@@ -20,7 +20,11 @@ namespace workflow
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
+            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+            timer.Interval = (1 * 1000); // 10 secs
+            timer.Tick += new EventHandler(timer_Tick);
+            timer.Start();
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -79,6 +83,7 @@ namespace workflow
             else
             {
                 this.a_sign_up_info_box.Text = Server.new_user(login, password).Item2;
+                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box);
             }
         }
 
@@ -89,9 +94,15 @@ namespace workflow
             screenConstructor.changeBoxes(this.a_sign_in_box, this.a_forgot_password_box);
         }
 
+        private void a_main_screen_left_panel_name_Click(object sender, EventArgs e)
+        {
 
+        }
 
-
+        private void a_main_screen_top_panel_button1_text_Click(object sender, EventArgs e)
+        {
+            
+        }
 
 
 
@@ -109,6 +120,11 @@ namespace workflow
             {
                 this.a_forgot_password_info_box.Text = Server.refresh_password(login).Item2;
             }
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt");
         }
     }
 }

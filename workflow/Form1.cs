@@ -25,6 +25,7 @@ namespace workflow
             timer.Interval = (1 * 1000); // 10 secs
             timer.Tick += new EventHandler(timer_Tick);
             timer.Start();
+            screenConstructor.setBox(a_main_screen_box, this);
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -42,6 +43,7 @@ namespace workflow
                 this.a_sign_in_forgot_password_button.Visible = false; //Убираем кнопку 'забыли пароль'
                 this.a_sign_in_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign in > " + "password : " + password + " login : " + login);
+                screenConstructor.changeBoxes(this.a_sign_in_box, this.a_main_screen_box);
             }
             else
             {
@@ -79,11 +81,11 @@ namespace workflow
             {
                 this.a_sign_up_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign up > " + "password : " + password + " login : " + login);
+                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box);
             }
             else
             {
                 this.a_sign_up_info_box.Text = Server.new_user(login, password).Item2;
-                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box);
             }
         }
 
@@ -101,7 +103,7 @@ namespace workflow
 
         private void a_main_screen_top_panel_button1_text_Click(object sender, EventArgs e)
         {
-            
+
         }
 
 
@@ -125,6 +127,39 @@ namespace workflow
         private void timer_Tick(object sender, EventArgs e)
         {
             this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt");
+        }
+
+        private void a_main_screen_main_info_panel_text_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void a_change_image_set(object sender, CancelEventArgs e)
+        {
+            Console.WriteLine("Image set by user : " + this.a_change_image_dialog.FileName);
+            User.set_photo(this.a_change_image_dialog.FileName, this);
+        }
+
+        private void a_image_changed_by_user(object sender, EventArgs e)
+        {
+            Console.WriteLine("Image set by user");
+            this.a_change_image_dialog.ShowDialog();
+        }
+
+        private void a_show_change_photo_label(object sender, EventArgs e)
+        {
+            this.a_main_screen_left_panel_change_image_label.Visible = true;
+        }
+
+        private void a_hide_change_photo_label(object sender, EventArgs e)
+        {
+            this.a_main_screen_left_panel_change_image_label.Visible = false;
+        }
+
+        private void a_image_changed_by_user(object sender, MouseEventArgs e)
+        {
+            Console.WriteLine("Image set by user");
+            this.a_change_image_dialog.ShowDialog();
         }
     }
 }

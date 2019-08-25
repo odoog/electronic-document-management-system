@@ -51,7 +51,9 @@
             this.a_forgot_password_login_label = new System.Windows.Forms.Label();
             this.a_forgot_password_login_text_box = new System.Windows.Forms.TextBox();
             this.a_main_screen_box = new System.Windows.Forms.Panel();
+            this.a_main_screen_main_box = new System.Windows.Forms.Panel();
             this.a_main_screen_main_info_panel = new System.Windows.Forms.Panel();
+            this.a_main_screen_main_info_panel_text = new System.Windows.Forms.Label();
             this.a_main_screen_top_panel_box = new System.Windows.Forms.Panel();
             this.a_main_screen_top_panel_button3 = new System.Windows.Forms.Panel();
             this.a_main_screen_top_panel_button3_text = new System.Windows.Forms.Label();
@@ -60,25 +62,29 @@
             this.a_main_screen_top_panel_button1 = new System.Windows.Forms.Panel();
             this.a_main_screen_top_panel_button1_text = new System.Windows.Forms.Label();
             this.a_main_screen_left_panel_box = new System.Windows.Forms.Panel();
+            this.a_main_screen_left_panel_picture_box = new System.Windows.Forms.Panel();
+            this.a_main_screen_left_panel_change_image_label = new System.Windows.Forms.Label();
+            this.a_main_screen_left_panel_picture = new System.Windows.Forms.PictureBox();
             this.a_main_screen_left_panel_time_box = new System.Windows.Forms.Panel();
             this.a_main_screen_left_panel_time = new System.Windows.Forms.Label();
             this.a_main_screen_left_panel_custom_box = new System.Windows.Forms.Panel();
             this.a_main_screen_left_panel_name_box = new System.Windows.Forms.Panel();
             this.a_main_screen_left_panel_name = new System.Windows.Forms.Label();
-            this.a_main_screen_left_panel_picture_box = new System.Windows.Forms.PictureBox();
-            this.a_main_screen_main_box = new System.Windows.Forms.Panel();
+            this.a_change_image_dialog = new System.Windows.Forms.OpenFileDialog();
             this.a_sign_in_box.SuspendLayout();
             this.a_sign_up_box.SuspendLayout();
             this.a_forgot_password_box.SuspendLayout();
             this.a_main_screen_box.SuspendLayout();
+            this.a_main_screen_main_info_panel.SuspendLayout();
             this.a_main_screen_top_panel_box.SuspendLayout();
             this.a_main_screen_top_panel_button3.SuspendLayout();
             this.a_main_screen_top_panel_button2.SuspendLayout();
             this.a_main_screen_top_panel_button1.SuspendLayout();
             this.a_main_screen_left_panel_box.SuspendLayout();
+            this.a_main_screen_left_panel_picture_box.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.a_main_screen_left_panel_picture)).BeginInit();
             this.a_main_screen_left_panel_time_box.SuspendLayout();
             this.a_main_screen_left_panel_name_box.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.a_main_screen_left_panel_picture_box)).BeginInit();
             this.SuspendLayout();
             // 
             // a_sign_in_box
@@ -314,13 +320,34 @@
             this.a_main_screen_box.Size = new System.Drawing.Size(1002, 604);
             this.a_main_screen_box.TabIndex = 3;
             // 
+            // a_main_screen_main_box
+            // 
+            this.a_main_screen_main_box.Location = new System.Drawing.Point(139, 175);
+            this.a_main_screen_main_box.Name = "a_main_screen_main_box";
+            this.a_main_screen_main_box.Size = new System.Drawing.Size(864, 425);
+            this.a_main_screen_main_box.TabIndex = 4;
+            // 
             // a_main_screen_main_info_panel
             // 
             this.a_main_screen_main_info_panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_main_info_panel.Controls.Add(this.a_main_screen_main_info_panel_text);
             this.a_main_screen_main_info_panel.Location = new System.Drawing.Point(138, 99);
             this.a_main_screen_main_info_panel.Name = "a_main_screen_main_info_panel";
             this.a_main_screen_main_info_panel.Size = new System.Drawing.Size(864, 76);
             this.a_main_screen_main_info_panel.TabIndex = 3;
+            // 
+            // a_main_screen_main_info_panel_text
+            // 
+            this.a_main_screen_main_info_panel_text.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.a_main_screen_main_info_panel_text.Location = new System.Drawing.Point(6, 9);
+            this.a_main_screen_main_info_panel_text.MaximumSize = new System.Drawing.Size(1043, 58);
+            this.a_main_screen_main_info_panel_text.Name = "a_main_screen_main_info_panel_text";
+            this.a_main_screen_main_info_panel_text.Size = new System.Drawing.Size(844, 58);
+            this.a_main_screen_main_info_panel_text.TabIndex = 0;
+            this.a_main_screen_main_info_panel_text.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor in" +
+    "cididunt ut labore et dolore magna aliqua. ";
+            this.a_main_screen_main_info_panel_text.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.a_main_screen_main_info_panel_text.Click += new System.EventHandler(this.a_main_screen_main_info_panel_text_Click);
             // 
             // a_main_screen_top_panel_box
             // 
@@ -400,14 +427,47 @@
             // a_main_screen_left_panel_box
             // 
             this.a_main_screen_left_panel_box.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_left_panel_box.Controls.Add(this.a_main_screen_left_panel_picture_box);
             this.a_main_screen_left_panel_box.Controls.Add(this.a_main_screen_left_panel_time_box);
             this.a_main_screen_left_panel_box.Controls.Add(this.a_main_screen_left_panel_custom_box);
             this.a_main_screen_left_panel_box.Controls.Add(this.a_main_screen_left_panel_name_box);
-            this.a_main_screen_left_panel_box.Controls.Add(this.a_main_screen_left_panel_picture_box);
             this.a_main_screen_left_panel_box.Location = new System.Drawing.Point(0, 0);
             this.a_main_screen_left_panel_box.Name = "a_main_screen_left_panel_box";
             this.a_main_screen_left_panel_box.Size = new System.Drawing.Size(139, 601);
             this.a_main_screen_left_panel_box.TabIndex = 1;
+            // 
+            // a_main_screen_left_panel_picture_box
+            // 
+            this.a_main_screen_left_panel_picture_box.Controls.Add(this.a_main_screen_left_panel_change_image_label);
+            this.a_main_screen_left_panel_picture_box.Controls.Add(this.a_main_screen_left_panel_picture);
+            this.a_main_screen_left_panel_picture_box.Location = new System.Drawing.Point(0, 0);
+            this.a_main_screen_left_panel_picture_box.Name = "a_main_screen_left_panel_picture_box";
+            this.a_main_screen_left_panel_picture_box.Size = new System.Drawing.Size(139, 139);
+            this.a_main_screen_left_panel_picture_box.TabIndex = 5;
+            // 
+            // a_main_screen_left_panel_change_image_label
+            // 
+            this.a_main_screen_left_panel_change_image_label.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.a_main_screen_left_panel_change_image_label.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.a_main_screen_left_panel_change_image_label.Location = new System.Drawing.Point(28, 66);
+            this.a_main_screen_left_panel_change_image_label.Name = "a_main_screen_left_panel_change_image_label";
+            this.a_main_screen_left_panel_change_image_label.Size = new System.Drawing.Size(85, 16);
+            this.a_main_screen_left_panel_change_image_label.TabIndex = 4;
+            this.a_main_screen_left_panel_change_image_label.Text = "Сменить фото";
+            this.a_main_screen_left_panel_change_image_label.Visible = false;
+            // 
+            // a_main_screen_left_panel_picture
+            // 
+            this.a_main_screen_left_panel_picture.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.a_main_screen_left_panel_picture.ImageLocation = "";
+            this.a_main_screen_left_panel_picture.Location = new System.Drawing.Point(0, 0);
+            this.a_main_screen_left_panel_picture.Name = "a_main_screen_left_panel_picture";
+            this.a_main_screen_left_panel_picture.Size = new System.Drawing.Size(139, 139);
+            this.a_main_screen_left_panel_picture.TabIndex = 0;
+            this.a_main_screen_left_panel_picture.TabStop = false;
+            this.a_main_screen_left_panel_picture.MouseEnter += new System.EventHandler(this.a_show_change_photo_label);
+            this.a_main_screen_left_panel_picture.MouseLeave += new System.EventHandler(this.a_hide_change_photo_label);
+            this.a_main_screen_left_panel_picture.MouseUp += new System.Windows.Forms.MouseEventHandler(this.a_image_changed_by_user);
             // 
             // a_main_screen_left_panel_time_box
             // 
@@ -457,22 +517,11 @@
             this.a_main_screen_left_panel_name.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.a_main_screen_left_panel_name.Click += new System.EventHandler(this.a_main_screen_left_panel_name_Click);
             // 
-            // a_main_screen_left_panel_picture_box
+            // a_change_image_dialog
             // 
-            this.a_main_screen_left_panel_picture_box.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.a_main_screen_left_panel_picture_box.ImageLocation = "https://www.pavilionweb.com/wp-content/uploads/2017/03/man-300x300.png";
-            this.a_main_screen_left_panel_picture_box.Location = new System.Drawing.Point(0, 0);
-            this.a_main_screen_left_panel_picture_box.Name = "a_main_screen_left_panel_picture_box";
-            this.a_main_screen_left_panel_picture_box.Size = new System.Drawing.Size(137, 599);
-            this.a_main_screen_left_panel_picture_box.TabIndex = 0;
-            this.a_main_screen_left_panel_picture_box.TabStop = false;
-            // 
-            // a_main_screen_main_box
-            // 
-            this.a_main_screen_main_box.Location = new System.Drawing.Point(139, 175);
-            this.a_main_screen_main_box.Name = "a_main_screen_main_box";
-            this.a_main_screen_main_box.Size = new System.Drawing.Size(864, 425);
-            this.a_main_screen_main_box.TabIndex = 4;
+            this.a_change_image_dialog.DefaultExt = "png";
+            this.a_change_image_dialog.FileName = "a_change_image";
+            this.a_change_image_dialog.FileOk += new System.ComponentModel.CancelEventHandler(this.a_change_image_set);
             // 
             // login_form
             // 
@@ -493,6 +542,7 @@
             this.a_forgot_password_box.ResumeLayout(false);
             this.a_forgot_password_box.PerformLayout();
             this.a_main_screen_box.ResumeLayout(false);
+            this.a_main_screen_main_info_panel.ResumeLayout(false);
             this.a_main_screen_top_panel_box.ResumeLayout(false);
             this.a_main_screen_top_panel_button3.ResumeLayout(false);
             this.a_main_screen_top_panel_button3.PerformLayout();
@@ -501,25 +551,23 @@
             this.a_main_screen_top_panel_button1.ResumeLayout(false);
             this.a_main_screen_top_panel_button1.PerformLayout();
             this.a_main_screen_left_panel_box.ResumeLayout(false);
+            this.a_main_screen_left_panel_picture_box.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.a_main_screen_left_panel_picture)).EndInit();
             this.a_main_screen_left_panel_time_box.ResumeLayout(false);
             this.a_main_screen_left_panel_time_box.PerformLayout();
             this.a_main_screen_left_panel_name_box.ResumeLayout(false);
             this.a_main_screen_left_panel_name_box.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.a_main_screen_left_panel_picture_box)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.GroupBox a_sign_in_box;
         private System.Windows.Forms.TextBox a_sign_in_login_text_box;
         private System.Windows.Forms.Button a_sign_in_button;
         private System.Windows.Forms.Label a_sign_in_password_label;
         private System.Windows.Forms.TextBox a_sign_in_password_text_box;
         private System.Windows.Forms.Label a_sign_in_login_label;
         private System.Windows.Forms.Button a_sign_up_page_button;
-        private System.Windows.Forms.GroupBox a_sign_up_box;
         private System.Windows.Forms.Button a_sign_in_page_button;
         private System.Windows.Forms.Button a_sign_up_button;
         private System.Windows.Forms.Label a_sign_up_password_label;
@@ -529,16 +577,13 @@
         private System.Windows.Forms.Label a_sign_up_info_box;
         private System.Windows.Forms.Label a_sign_in_info_box;
         private System.Windows.Forms.Label a_sign_in_forgot_password_button;
-        private System.Windows.Forms.GroupBox a_forgot_password_box;
         private System.Windows.Forms.Button a_forgot_password_send_button;
         private System.Windows.Forms.Label a_forgot_password_login_label;
         private System.Windows.Forms.TextBox a_forgot_password_login_text_box;
         private System.Windows.Forms.Label a_forgot_password_info_box;
-        private System.Windows.Forms.Panel a_main_screen_box;
         private System.Windows.Forms.Panel a_main_screen_left_panel_box;
         private System.Windows.Forms.Panel a_main_screen_left_panel_name_box;
         private System.Windows.Forms.Label a_main_screen_left_panel_name;
-        private System.Windows.Forms.PictureBox a_main_screen_left_panel_picture_box;
         private System.Windows.Forms.Panel a_main_screen_top_panel_box;
         private System.Windows.Forms.Panel a_main_screen_left_panel_custom_box;
         private System.Windows.Forms.Panel a_main_screen_top_panel_button3;
@@ -551,6 +596,15 @@
         private System.Windows.Forms.Panel a_main_screen_left_panel_time_box;
         private System.Windows.Forms.Label a_main_screen_left_panel_time;
         private System.Windows.Forms.Panel a_main_screen_main_box;
+        private System.Windows.Forms.Label a_main_screen_main_info_panel_text;
+        public System.Windows.Forms.GroupBox a_sign_in_box;
+        public System.Windows.Forms.GroupBox a_sign_up_box;
+        public System.Windows.Forms.GroupBox a_forgot_password_box;
+        public System.Windows.Forms.Panel a_main_screen_box;
+        private System.Windows.Forms.Label a_main_screen_left_panel_change_image_label;
+        public System.Windows.Forms.PictureBox a_main_screen_left_panel_picture;
+        public System.Windows.Forms.Panel a_main_screen_left_panel_picture_box;
+        public System.Windows.Forms.OpenFileDialog a_change_image_dialog;
     }
 }
 

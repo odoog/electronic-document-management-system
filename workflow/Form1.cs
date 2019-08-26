@@ -25,6 +25,11 @@ namespace workflow
             timer.Interval = (1 * 1000); // 10 secs
             timer.Tick += new EventHandler(timer_Tick);
             timer.Start();
+
+            Server.getUser();
+
+            User.set_name("Петров И. И.", this);
+
             screenConstructor.setBox(a_main_screen_box, this);
         }
 
@@ -43,7 +48,7 @@ namespace workflow
                 this.a_sign_in_forgot_password_button.Visible = false; //Убираем кнопку 'забыли пароль'
                 this.a_sign_in_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign in > " + "password : " + password + " login : " + login);
-                screenConstructor.changeBoxes(this.a_sign_in_box, this.a_main_screen_box);
+                screenConstructor.changeBoxes(this.a_sign_in_box, this.a_main_screen_box, this);
             }
             else
             {
@@ -64,12 +69,12 @@ namespace workflow
 
         private void a_sign_up_page_button_Click(object sender, EventArgs e)
         {
-            screenConstructor.changeBoxes(this.a_sign_in_box, this.a_sign_up_box);
+            screenConstructor.changeBoxes(this.a_sign_in_box, this.a_sign_up_box, this);
         }
 
         private void a_sign_in_page_button_Click(object sender, EventArgs e)
         {
-            screenConstructor.changeBoxes(this.a_sign_up_box, this.a_sign_in_box);
+            screenConstructor.changeBoxes(this.a_sign_up_box, this.a_sign_in_box, this);
         }
 
         private void a_sign_up_button_Click(object sender, EventArgs e)
@@ -81,7 +86,7 @@ namespace workflow
             {
                 this.a_sign_up_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign up > " + "password : " + password + " login : " + login);
-                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box);
+                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box, this);
             }
             else
             {
@@ -93,7 +98,7 @@ namespace workflow
         {
             this.a_sign_in_forgot_password_button.Visible = false; //Убираем кнопку 'забыли пароль'
             this.a_sign_in_info_box.Text = ""; //Убираем окно ошибки
-            screenConstructor.changeBoxes(this.a_sign_in_box, this.a_forgot_password_box);
+            screenConstructor.changeBoxes(this.a_sign_in_box, this.a_forgot_password_box, this);
         }
 
         private void a_main_screen_left_panel_name_Click(object sender, EventArgs e)
@@ -116,7 +121,7 @@ namespace workflow
             if (Server.refresh_password(login).Item1)
             {
                 this.a_forgot_password_info_box.Text = ""; //Убираем окно ошибки
-                screenConstructor.changeBoxes(this.a_forgot_password_box, this.a_sign_in_box);
+                screenConstructor.changeBoxes(this.a_forgot_password_box, this.a_sign_in_box, this);
             }
             else
             {
@@ -126,7 +131,7 @@ namespace workflow
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt");
+            this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("H:mm:ss tt");
         }
 
         private void a_main_screen_main_info_panel_text_Click(object sender, EventArgs e)
@@ -142,7 +147,6 @@ namespace workflow
 
         private void a_image_changed_by_user(object sender, EventArgs e)
         {
-            Console.WriteLine("Image set by user");
             this.a_change_image_dialog.ShowDialog();
         }
 
@@ -156,10 +160,24 @@ namespace workflow
             this.a_main_screen_left_panel_change_image_label.Visible = false;
         }
 
-        private void a_image_changed_by_user(object sender, MouseEventArgs e)
+        private void a_main_screen_top_panel_button1_Click(object sender, MouseEventArgs e)
         {
-            Console.WriteLine("Image set by user");
-            this.a_change_image_dialog.ShowDialog();
+            screenConstructor.changeMainScreenEnvironment("main", this);
+        }
+
+        private void a_main_screen_top_panel_button2_Click(object sender, MouseEventArgs e)
+        {
+            screenConstructor.changeMainScreenEnvironment("documents", this);
+        }
+
+        private void a_main_screen_top_panel_button3_Click(object sender, MouseEventArgs e)
+        {
+            screenConstructor.changeMainScreenEnvironment("chats", this);
+        }
+
+        public void a_add_news_button_click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Add news");
         }
     }
 }

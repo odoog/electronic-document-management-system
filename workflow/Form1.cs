@@ -178,6 +178,22 @@ namespace workflow
         public void a_add_news_button_click(object sender, EventArgs e)
         {
             Console.WriteLine("Add news");
+            a_main_screen_main_box_add_news_panel.Visible = true;
+        }
+
+        private void a_publish_news(object sender, EventArgs e)
+        {
+            string label_of_news = a_main_screen_main_box_add_news_panel_news_label_text_box.Text;
+            string content_of_news = a_main_screen_main_box_add_news_panel_news_content_text_box.Text;
+
+            Server.addNews(label_of_news, content_of_news);
+
+            a_main_screen_main_box_add_news_panel.Visible = false;
+        }
+
+        private void a_exit_add_news_panel(object sender, EventArgs e)
+        {
+            a_main_screen_main_box_add_news_panel.Visible = false;
         }
     }
 }

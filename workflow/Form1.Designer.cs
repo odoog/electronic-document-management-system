@@ -52,9 +52,15 @@
             this.a_forgot_password_login_text_box = new System.Windows.Forms.TextBox();
             this.a_main_screen_box = new System.Windows.Forms.Panel();
             this.a_main_screen_main_box = new System.Windows.Forms.Panel();
+            this.a_main_screen_main_box_add_news_panel = new System.Windows.Forms.Panel();
+            this.a_main_screen_main_box_add_news_panel_exit_button = new System.Windows.Forms.Button();
+            this.a_main_screen_main_box_add_news_panel_publish_button = new System.Windows.Forms.Button();
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box = new System.Windows.Forms.RichTextBox();
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box = new System.Windows.Forms.TextBox();
+            this.a_main_screen_main_box_add_news_panel_news_content_label = new System.Windows.Forms.Label();
+            this.a_main_screen_main_box_add_news_panel_news_label_label = new System.Windows.Forms.Label();
             this.a_main_screen_main_box_add_news_button = new System.Windows.Forms.Panel();
             this.a_main_screen_main_box_add_new_button_text = new System.Windows.Forms.Label();
-            this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.a_main_screen_main_info_panel = new System.Windows.Forms.Panel();
             this.a_main_screen_main_info_panel_text = new System.Windows.Forms.Label();
             this.a_main_screen_top_panel_box = new System.Windows.Forms.Panel();
@@ -69,6 +75,7 @@
             this.a_main_screen_left_panel_change_image_label = new System.Windows.Forms.Label();
             this.a_main_screen_left_panel_picture = new System.Windows.Forms.PictureBox();
             this.a_main_screen_left_panel_time_box = new System.Windows.Forms.Panel();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.a_main_screen_left_panel_time = new System.Windows.Forms.Label();
             this.a_main_screen_left_panel_custom_box = new System.Windows.Forms.Panel();
             this.a_main_screen_left_panel_name_box = new System.Windows.Forms.Panel();
@@ -79,6 +86,7 @@
             this.a_forgot_password_box.SuspendLayout();
             this.a_main_screen_box.SuspendLayout();
             this.a_main_screen_main_box.SuspendLayout();
+            this.a_main_screen_main_box_add_news_panel.SuspendLayout();
             this.a_main_screen_main_box_add_news_button.SuspendLayout();
             this.a_main_screen_main_info_panel.SuspendLayout();
             this.a_main_screen_top_panel_box.SuspendLayout();
@@ -327,12 +335,85 @@
             // 
             // a_main_screen_main_box
             // 
+            this.a_main_screen_main_box.AutoScroll = true;
+            this.a_main_screen_main_box.Controls.Add(this.a_main_screen_main_box_add_news_panel);
             this.a_main_screen_main_box.Controls.Add(this.a_main_screen_main_box_add_news_button);
-            this.a_main_screen_main_box.Controls.Add(this.vScrollBar1);
             this.a_main_screen_main_box.Location = new System.Drawing.Point(139, 175);
             this.a_main_screen_main_box.Name = "a_main_screen_main_box";
             this.a_main_screen_main_box.Size = new System.Drawing.Size(864, 425);
             this.a_main_screen_main_box.TabIndex = 4;
+            // 
+            // a_main_screen_main_box_add_news_panel
+            // 
+            this.a_main_screen_main_box_add_news_panel.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.a_main_screen_main_box_add_news_panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_exit_button);
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_publish_button);
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_news_content_text_box);
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_news_label_text_box);
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_news_content_label);
+            this.a_main_screen_main_box_add_news_panel.Controls.Add(this.a_main_screen_main_box_add_news_panel_news_label_label);
+            this.a_main_screen_main_box_add_news_panel.Location = new System.Drawing.Point(100, 80);
+            this.a_main_screen_main_box_add_news_panel.Name = "a_main_screen_main_box_add_news_panel";
+            this.a_main_screen_main_box_add_news_panel.Size = new System.Drawing.Size(658, 272);
+            this.a_main_screen_main_box_add_news_panel.TabIndex = 3;
+            // 
+            // a_main_screen_main_box_add_news_panel_exit_button
+            // 
+            this.a_main_screen_main_box_add_news_panel_exit_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.a_main_screen_main_box_add_news_panel_exit_button.Location = new System.Drawing.Point(619, 3);
+            this.a_main_screen_main_box_add_news_panel_exit_button.Name = "a_main_screen_main_box_add_news_panel_exit_button";
+            this.a_main_screen_main_box_add_news_panel_exit_button.Size = new System.Drawing.Size(22, 31);
+            this.a_main_screen_main_box_add_news_panel_exit_button.TabIndex = 6;
+            this.a_main_screen_main_box_add_news_panel_exit_button.Text = "x";
+            this.a_main_screen_main_box_add_news_panel_exit_button.UseVisualStyleBackColor = true;
+            this.a_main_screen_main_box_add_news_panel_exit_button.Click += new System.EventHandler(this.a_exit_add_news_panel);
+            // 
+            // a_main_screen_main_box_add_news_panel_publish_button
+            // 
+            this.a_main_screen_main_box_add_news_panel_publish_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.a_main_screen_main_box_add_news_panel_publish_button.Location = new System.Drawing.Point(259, 246);
+            this.a_main_screen_main_box_add_news_panel_publish_button.Name = "a_main_screen_main_box_add_news_panel_publish_button";
+            this.a_main_screen_main_box_add_news_panel_publish_button.Size = new System.Drawing.Size(164, 23);
+            this.a_main_screen_main_box_add_news_panel_publish_button.TabIndex = 5;
+            this.a_main_screen_main_box_add_news_panel_publish_button.Text = "Опубликовать новость";
+            this.a_main_screen_main_box_add_news_panel_publish_button.UseVisualStyleBackColor = true;
+            this.a_main_screen_main_box_add_news_panel_publish_button.Click += new System.EventHandler(this.a_publish_news);
+            // 
+            // a_main_screen_main_box_add_news_panel_news_content_text_box
+            // 
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.Location = new System.Drawing.Point(130, 66);
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.Name = "a_main_screen_main_box_add_news_panel_news_content_text_box";
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.Size = new System.Drawing.Size(511, 156);
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.TabIndex = 4;
+            this.a_main_screen_main_box_add_news_panel_news_content_text_box.Text = "";
+            // 
+            // a_main_screen_main_box_add_news_panel_news_label_text_box
+            // 
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box.Location = new System.Drawing.Point(130, 40);
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box.Name = "a_main_screen_main_box_add_news_panel_news_label_text_box";
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box.Size = new System.Drawing.Size(511, 20);
+            this.a_main_screen_main_box_add_news_panel_news_label_text_box.TabIndex = 2;
+            // 
+            // a_main_screen_main_box_add_news_panel_news_content_label
+            // 
+            this.a_main_screen_main_box_add_news_panel_news_content_label.AutoSize = true;
+            this.a_main_screen_main_box_add_news_panel_news_content_label.Location = new System.Drawing.Point(13, 66);
+            this.a_main_screen_main_box_add_news_panel_news_content_label.Name = "a_main_screen_main_box_add_news_panel_news_content_label";
+            this.a_main_screen_main_box_add_news_panel_news_content_label.Size = new System.Drawing.Size(87, 13);
+            this.a_main_screen_main_box_add_news_panel_news_content_label.TabIndex = 1;
+            this.a_main_screen_main_box_add_news_panel_news_content_label.Text = "Текст новости: ";
+            // 
+            // a_main_screen_main_box_add_news_panel_news_label_label
+            // 
+            this.a_main_screen_main_box_add_news_panel_news_label_label.AutoSize = true;
+            this.a_main_screen_main_box_add_news_panel_news_label_label.Location = new System.Drawing.Point(13, 40);
+            this.a_main_screen_main_box_add_news_panel_news_label_label.Name = "a_main_screen_main_box_add_news_panel_news_label_label";
+            this.a_main_screen_main_box_add_news_panel_news_label_label.Size = new System.Drawing.Size(111, 13);
+            this.a_main_screen_main_box_add_news_panel_news_label_label.TabIndex = 0;
+            this.a_main_screen_main_box_add_news_panel_news_label_label.Text = "Заголовок новости: ";
             // 
             // a_main_screen_main_box_add_news_button
             // 
@@ -354,13 +435,6 @@
             this.a_main_screen_main_box_add_new_button_text.Text = "Добавить новость";
             this.a_main_screen_main_box_add_new_button_text.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.a_main_screen_main_box_add_new_button_text.Click += new System.EventHandler(this.a_add_news_button_click);
-            // 
-            // vScrollBar1
-            // 
-            this.vScrollBar1.Location = new System.Drawing.Point(840, -1);
-            this.vScrollBar1.Name = "vScrollBar1";
-            this.vScrollBar1.Size = new System.Drawing.Size(21, 426);
-            this.vScrollBar1.TabIndex = 1;
             // 
             // a_main_screen_main_info_panel
             // 
@@ -519,11 +593,20 @@
             // a_main_screen_left_panel_time_box
             // 
             this.a_main_screen_left_panel_time_box.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.a_main_screen_left_panel_time_box.Controls.Add(this.panel1);
             this.a_main_screen_left_panel_time_box.Controls.Add(this.a_main_screen_left_panel_time);
             this.a_main_screen_left_panel_time_box.Location = new System.Drawing.Point(0, 173);
             this.a_main_screen_left_panel_time_box.Name = "a_main_screen_left_panel_time_box";
             this.a_main_screen_left_panel_time_box.Size = new System.Drawing.Size(139, 39);
             this.a_main_screen_left_panel_time_box.TabIndex = 3;
+            // 
+            // panel1
+            // 
+            this.panel1.Location = new System.Drawing.Point(136, 0);
+            this.panel1.Margin = new System.Windows.Forms.Padding(0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(200, 100);
+            this.panel1.TabIndex = 4;
             // 
             // a_main_screen_left_panel_time
             // 
@@ -588,6 +671,8 @@
             this.a_forgot_password_box.PerformLayout();
             this.a_main_screen_box.ResumeLayout(false);
             this.a_main_screen_main_box.ResumeLayout(false);
+            this.a_main_screen_main_box_add_news_panel.ResumeLayout(false);
+            this.a_main_screen_main_box_add_news_panel.PerformLayout();
             this.a_main_screen_main_box_add_news_button.ResumeLayout(false);
             this.a_main_screen_main_info_panel.ResumeLayout(false);
             this.a_main_screen_top_panel_box.ResumeLayout(false);
@@ -649,10 +734,17 @@
         public System.Windows.Forms.Label a_main_screen_top_panel_button3_text;
         public System.Windows.Forms.Label a_main_screen_top_panel_button2_text;
         public System.Windows.Forms.Panel a_main_screen_left_panel_custom_box;
-        private System.Windows.Forms.VScrollBar vScrollBar1;
         public System.Windows.Forms.Label a_main_screen_main_box_add_new_button_text;
         public System.Windows.Forms.Panel a_main_screen_main_box_add_news_button;
         public System.Windows.Forms.Panel a_main_screen_main_box;
+        private System.Windows.Forms.Button a_main_screen_main_box_add_news_panel_publish_button;
+        private System.Windows.Forms.Label a_main_screen_main_box_add_news_panel_news_content_label;
+        private System.Windows.Forms.Label a_main_screen_main_box_add_news_panel_news_label_label;
+        public System.Windows.Forms.Panel a_main_screen_main_box_add_news_panel;
+        public System.Windows.Forms.RichTextBox a_main_screen_main_box_add_news_panel_news_content_text_box;
+        public System.Windows.Forms.TextBox a_main_screen_main_box_add_news_panel_news_label_text_box;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button a_main_screen_main_box_add_news_panel_exit_button;
     }
 }
 

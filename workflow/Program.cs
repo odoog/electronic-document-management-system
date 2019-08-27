@@ -11,6 +11,25 @@ using System.Text;
 namespace workflow
 {
 
+    public class News
+    {
+
+        public string author;
+        public string label;
+        public string content;
+        public string time;
+
+        public News(string _author, string _label, string _content, string _time)
+        {
+            this.author = _author;
+            this.label = _label;
+            this.content = _content;
+            this.time = _time;
+        }
+
+    }
+
+
     public static class Server
     {
 
@@ -19,6 +38,35 @@ namespace workflow
             User.shedule = new List<string>() { "Русский", "Математика", "Информатика", "Русский", "Математика", "Информатика", "Русский" };
         }
 
+        public static void addNews(string labelOfNews, string contentOfNews)
+        {
+            Console.WriteLine("Add news : " + labelOfNews + " : " + contentOfNews);
+        }
+
+        public static List<News> getNews()
+        {
+
+            List<News> contentMain = new List<News>();
+
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+
+            return contentMain;
+        }
 
         public static Tuple<bool, string> check_user_enter(string login, string password)
         {
@@ -78,21 +126,7 @@ namespace workflow
     public class helpToDraw
     {
 
-        public static Label getAddNewsButton(workflow.login_form connectForm)
-        {
-            Label add_news_button = new Label();
 
-            add_news_button.Size = new Size(130, 19);
-            add_news_button.BackColor = SystemColors.ControlLight;
-            add_news_button.BorderStyle = BorderStyle.FixedSingle;
-            add_news_button.Location = new Point(670, -1);
-            add_news_button.TextAlign = ContentAlignment.MiddleCenter;
-            add_news_button.Text = "Добавить новость";
-            add_news_button.Cursor = Cursors.Hand;
-            add_news_button.Click += new EventHandler(connectForm.a_add_news_button_click);
-
-            return add_news_button;
-        }
 
     }
 
@@ -172,7 +206,17 @@ namespace workflow
         public static void cleanMainScreenEnvironment(workflow.login_form connectForm)
         {
             connectForm.a_main_screen_left_panel_custom_box.Controls.Clear();
+
+            Panel a_main_screen_main_box_add_news_panel = connectForm.a_main_screen_main_box_add_news_panel;  //Cохраняем панель 'Добавить новость'
+            Panel a_main_screen_main_box_add_news_button = connectForm.a_main_screen_main_box_add_news_button; //Cохраняем кнопку 'Добавить новость'
+
             connectForm.a_main_screen_main_box.Controls.Clear();
+
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_panel); //Возвращаем панель 'Добавить новость'
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_button); //Возвращаем кнопку 'Добавить новость'
+
+            connectForm.a_main_screen_main_box_add_news_panel.Visible = false;
+            connectForm.a_main_screen_main_box_add_news_button.Visible = false;
         }
 
         public static void changeMainScreenEnvironment(string environment, workflow.login_form connectForm)
@@ -186,21 +230,35 @@ namespace workflow
 
                     resetTopPanelButtonsColors(connectForm.a_main_screen_top_panel_button1_text, connectForm);
 
-                    List<string> label = new List<string>() { "Расписание: " };
-                    List<string> content = User.shedule;
-                    List<string> filled = label.Concat(content).ToList();
+                    //--------------------------- left screen changes
 
-                    Dictionary<int, ContentAlignment> properties = new Dictionary<int, ContentAlignment>(filled.Count());
+                    List<string> labelLeft = new List<string>() { "Расписание: " };
+                    List<string> contentLeft = User.shedule;
+                    List<string> filledLeft = labelLeft.Concat(contentLeft).ToList();
 
-                    properties.Add(0, ContentAlignment.MiddleCenter);
+                    Dictionary<int, ContentAlignment> propertiesLeft = new Dictionary<int, ContentAlignment>(filledLeft.Count());
 
-                    customBox.addElements(filled, properties, connectForm.a_main_screen_left_panel_custom_box);
+                    propertiesLeft.Add(0, ContentAlignment.MiddleCenter);
+
+                    customBox.addElements(filledLeft, propertiesLeft, connectForm.a_main_screen_left_panel_custom_box);
 
                     if (User.getPrivilege("addNews"))
                     {
-                        connectForm.a_main_screen_main_box.Controls.Add(helpToDraw.getAddNewsButton(connectForm));
+                        connectForm.a_main_screen_main_box_add_news_button.Visible = true;
                     }
-                    
+
+                    //--------------------------- main screen changes
+
+                    List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации") };
+                    List<News> contentMain = Server.getNews();
+                    List<News> filledMain = labelMain.Concat(contentMain).ToList();
+
+                    Dictionary<int, Color> propertiesMain = new Dictionary<int, Color>(filledLeft.Count());
+
+                    propertiesMain.Add(0, SystemColors.ControlLight);
+
+                    mainBox.addElements(filledMain, propertiesMain, connectForm.a_main_screen_main_box);
+
 
                     Console.WriteLine("Change environment : main");
                     break;
@@ -274,6 +332,96 @@ namespace workflow
 
         }
 
+    }
+
+    public class mainBox
+    {
+        public static void addElements(List<News> elements, Dictionary<int, Color> properties, Panel mainBox)
+        {
+            int countOfElements = elements.Count();
+
+            int width = mainBox.Size.Width;
+            int height = mainBox.Size.Height;
+
+            int xMargin = 24;
+            int topYMargin = 30;
+            int yMargin = -1; //Контролирует отступы между строчками, при -1 border накладываются друг на друга
+
+            int widthOfElements = width - xMargin * 2;
+            int heightOfElements = 80;
+            int heightOfCustomElements = 40;
+
+            int xPosition = xMargin;
+            int yPosition = topYMargin;
+
+            int widthOfElementIncide = 0;
+
+            for (int num = 0; num < elements.Count(); num++)
+            {
+
+                Panel element = new Panel();
+                element.Location = new Point(xPosition, yPosition);
+
+                if (properties.ContainsKey(num))
+                {
+                    element.BackColor = properties[num];
+                    element.Size = new Size(widthOfElements, heightOfCustomElements);
+                }
+                else
+                {
+                    element.Size = new Size(widthOfElements, heightOfElements);
+                }
+
+                int xPositionIncide = 0;
+
+                Label author = new Label();
+                author.Text = elements[num].author;
+                widthOfElementIncide = widthOfElements / 10 * 1;
+                author.Size = new Size(widthOfElementIncide, element.Size.Height);
+                author.Location = new Point(xPositionIncide, 0);
+                author.BorderStyle = BorderStyle.FixedSingle;
+                author.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Label time = new Label();
+                time.Text = elements[num].time.ToString();
+                widthOfElementIncide = widthOfElements / 10 * 1;
+                time.Size = new Size(widthOfElementIncide, element.Size.Height);
+                time.Location = new Point(xPositionIncide, 0);
+                time.BorderStyle = BorderStyle.FixedSingle;
+                time.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Label label = new Label();
+                label.Text = elements[num].label;
+                widthOfElementIncide = widthOfElements / 10 * 1;
+                label.Size = new Size(widthOfElementIncide, element.Size.Height);
+                label.Location = new Point(xPositionIncide, 0);
+                label.BorderStyle = BorderStyle.FixedSingle;
+                label.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Label content = new Label();
+                content.Text = elements[num].content;
+                widthOfElementIncide = widthOfElements / 10 * 7;
+                content.Size = new Size(widthOfElementIncide, element.Size.Height);
+                content.Location = new Point(xPositionIncide, 0);
+                content.BorderStyle = BorderStyle.FixedSingle;
+                content.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+
+                element.Controls.Add(author);
+                element.Controls.Add(time);
+                element.Controls.Add(label);
+                element.Controls.Add(content);
+
+                yPosition += element.Size.Height + yMargin;
+                mainBox.Controls.Add(element);
+
+            }
+
+        }
     }
 
     static class Program

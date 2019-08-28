@@ -18,13 +18,15 @@ namespace workflow
         public string label;
         public string content;
         public string time;
+        public int id;
 
-        public News(string _author, string _label, string _content, string _time)
+        public News(string _author, string _label, string _content, string _time, int _id)
         {
             this.author = _author;
             this.label = _label;
             this.content = _content;
             this.time = _time;
+            this.id = _id;
         }
 
     }
@@ -36,6 +38,7 @@ namespace workflow
         public static void getUser()
         {
             User.shedule = new List<string>() { "Русский", "Математика", "Информатика", "Русский", "Математика", "Информатика", "Русский" };
+            User.name = "Иванов И.И";
         }
 
         public static void addNews(string labelOfNews, string contentOfNews)
@@ -43,29 +46,47 @@ namespace workflow
             Console.WriteLine("Add news : " + labelOfNews + " : " + contentOfNews);
         }
 
+        public static void changeMainNews(string contentOfNews)
+        {
+            Console.WriteLine("Change news : " + contentOfNews);
+        }
+
+        public static void deleteNews(object sender)
+        {
+
+            Button deleteButton = sender as Button;
+
+            Console.WriteLine("Delete news : " + deleteButton.Tag);
+        }
+
         public static List<News> getNews()
         {
 
             List<News> contentMain = new List<News>();
 
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString()));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 1));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 2));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 3));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 4));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 5));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 6));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 7));
+            contentMain.Add(new News("Фролов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 8));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 9));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 10));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 11));
+            contentMain.Add(new News("Иванова И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 12));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 13));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 14));
+            contentMain.Add(new News("Антонов К.А", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 15));
+            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 16));
 
             return contentMain;
+        }
+
+        public static string getMainNews()
+        {
+            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
         }
 
         public static Tuple<bool, string> check_user_enter(string login, string password)
@@ -101,6 +122,8 @@ namespace workflow
     {
 
         static public List<string> shedule;
+        static public string name;
+
 
         static public void set_photo(string photo_src, workflow.login_form connectForm)
         {
@@ -137,7 +160,7 @@ namespace workflow
         public static void setBox(Panel box, workflow.login_form connectForm)
         {
 
-            if(box == connectForm.a_main_screen_box)
+            if (box == connectForm.a_main_screen_box)
             {
                 screenConstructor.changeMainScreenEnvironment("main", connectForm);
             }
@@ -207,14 +230,17 @@ namespace workflow
         {
             connectForm.a_main_screen_left_panel_custom_box.Controls.Clear();
 
+            Panel a_main_screen_main_box_change_news_panel = connectForm.a_main_screen_main_box_change_news_panel; //Cохраняем панель 'Изменить новость'
             Panel a_main_screen_main_box_add_news_panel = connectForm.a_main_screen_main_box_add_news_panel;  //Cохраняем панель 'Добавить новость'
             Panel a_main_screen_main_box_add_news_button = connectForm.a_main_screen_main_box_add_news_button; //Cохраняем кнопку 'Добавить новость'
 
             connectForm.a_main_screen_main_box.Controls.Clear();
 
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_change_news_panel); //Возвращаем панель 'Изменить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_panel); //Возвращаем панель 'Добавить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_button); //Возвращаем кнопку 'Добавить новость'
 
+            connectForm.a_main_screen_main_box_change_news_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_news_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_news_button.Visible = false;
         }
@@ -249,7 +275,7 @@ namespace workflow
 
                     //--------------------------- main screen changes
 
-                    List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации") };
+                    List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации", 0) };
                     List<News> contentMain = Server.getNews();
                     List<News> filledMain = labelMain.Concat(contentMain).ToList();
 
@@ -257,7 +283,7 @@ namespace workflow
 
                     propertiesMain.Add(0, SystemColors.ControlLight);
 
-                    mainBox.addElements(filledMain, propertiesMain, connectForm.a_main_screen_main_box);
+                    mainBox.addElements(filledMain, propertiesMain, connectForm.a_main_screen_main_box, connectForm);
 
 
                     Console.WriteLine("Change environment : main");
@@ -279,6 +305,7 @@ namespace workflow
             }
         }
     }
+
 
     public class customBox
     {
@@ -336,7 +363,7 @@ namespace workflow
 
     public class mainBox
     {
-        public static void addElements(List<News> elements, Dictionary<int, Color> properties, Panel mainBox)
+        public static void addElements(List<News> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.login_form connectForm)
         {
             int countOfElements = elements.Count();
 
@@ -355,6 +382,7 @@ namespace workflow
             int yPosition = topYMargin;
 
             int widthOfElementIncide = 0;
+            int heightOfElementIncide = 0;
 
             for (int num = 0; num < elements.Count(); num++)
             {
@@ -377,7 +405,8 @@ namespace workflow
                 Label author = new Label();
                 author.Text = elements[num].author;
                 widthOfElementIncide = widthOfElements / 10 * 1;
-                author.Size = new Size(widthOfElementIncide, element.Size.Height);
+                heightOfElementIncide = element.Size.Height;
+                author.Size = new Size(widthOfElementIncide, heightOfElementIncide);
                 author.Location = new Point(xPositionIncide, 0);
                 author.BorderStyle = BorderStyle.FixedSingle;
                 author.TextAlign = ContentAlignment.MiddleCenter;
@@ -386,7 +415,8 @@ namespace workflow
                 Label time = new Label();
                 time.Text = elements[num].time.ToString();
                 widthOfElementIncide = widthOfElements / 10 * 1;
-                time.Size = new Size(widthOfElementIncide, element.Size.Height);
+                heightOfElementIncide = element.Size.Height;
+                time.Size = new Size(widthOfElementIncide, heightOfElementIncide);
                 time.Location = new Point(xPositionIncide, 0);
                 time.BorderStyle = BorderStyle.FixedSingle;
                 time.TextAlign = ContentAlignment.MiddleCenter;
@@ -395,7 +425,8 @@ namespace workflow
                 Label label = new Label();
                 label.Text = elements[num].label;
                 widthOfElementIncide = widthOfElements / 10 * 1;
-                label.Size = new Size(widthOfElementIncide, element.Size.Height);
+                heightOfElementIncide = element.Size.Height;
+                label.Size = new Size(widthOfElementIncide, heightOfElementIncide);
                 label.Location = new Point(xPositionIncide, 0);
                 label.BorderStyle = BorderStyle.FixedSingle;
                 label.TextAlign = ContentAlignment.MiddleCenter;
@@ -404,12 +435,28 @@ namespace workflow
                 Label content = new Label();
                 content.Text = elements[num].content;
                 widthOfElementIncide = widthOfElements / 10 * 7;
-                content.Size = new Size(widthOfElementIncide, element.Size.Height);
+                heightOfElementIncide = element.Size.Height;
+                content.Size = new Size(widthOfElementIncide, heightOfElementIncide);
                 content.Location = new Point(xPositionIncide, 0);
                 content.BorderStyle = BorderStyle.FixedSingle;
                 content.TextAlign = ContentAlignment.MiddleCenter;
                 xPositionIncide += widthOfElementIncide - 1;
 
+                if(User.name == elements[num].author)
+                {
+                    Button deleteNews = new Button();
+                    deleteNews.Text = "x";
+                    widthOfElementIncide = 22;
+                    heightOfElementIncide = 22;
+                    deleteNews.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    deleteNews.Location = new Point(xPositionIncide - widthOfElementIncide, 0);
+                    deleteNews.Tag = elements[num].id;
+                    deleteNews.Cursor = Cursors.Hand;
+
+                    deleteNews.Click += new EventHandler(connectForm.a_deleteNews_button_click);
+
+                    element.Controls.Add(deleteNews);
+                };
 
                 element.Controls.Add(author);
                 element.Controls.Add(time);

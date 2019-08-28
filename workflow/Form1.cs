@@ -31,6 +31,14 @@ namespace workflow
             User.set_name("Петров И. И.", this);
 
             screenConstructor.setBox(a_main_screen_box, this);
+
+            if (User.getPrivilege("changeMainNews"))
+            {
+                a_main_screen_main_info_panel_change_button.Visible = true;
+            }
+
+            a_main_screen_main_info_panel_text.Text = Server.getMainNews();
+
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -194,6 +202,29 @@ namespace workflow
         private void a_exit_add_news_panel(object sender, EventArgs e)
         {
             a_main_screen_main_box_add_news_panel.Visible = false;
+        }
+
+        public void a_deleteNews_button_click(object sender, EventArgs e)
+        {
+            Server.deleteNews(sender);
+        }
+
+        private void a_change_main_news_button_click(object sender, EventArgs e)
+        {
+            a_main_screen_main_box_change_news_panel.Visible = true;
+            a_main_screen_main_box_change_news_panel_news_content_text_box.Text = a_main_screen_main_info_panel_text.Text;
+        }
+
+        private void a_exit_change_news_panel(object sender, EventArgs e)
+        {
+            a_main_screen_main_box_change_news_panel.Visible = false;
+        }
+
+        private void a_change_news(object sender, EventArgs e)
+        {
+            string content_of_news = a_main_screen_main_box_change_news_panel_news_content_text_box.Text;
+            Server.changeMainNews(content_of_news);
+            a_main_screen_main_box_change_news_panel.Visible = false;
         }
     }
 }

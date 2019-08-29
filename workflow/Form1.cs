@@ -20,6 +20,8 @@ namespace workflow
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            User.systemData = new Dictionary<string, Label>();
+
             this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
             System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
             timer.Interval = (1 * 1000); // 10 secs
@@ -225,6 +227,50 @@ namespace workflow
             string content_of_news = a_main_screen_main_box_change_news_panel_news_content_text_box.Text;
             Server.changeMainNews(content_of_news);
             a_main_screen_main_box_change_news_panel.Visible = false;
+        }
+
+        public void a_documents_left_panel_button_click(object sender, EventArgs e)
+        {
+            Label senderLabel = sender as Label;
+            string senderButton = senderLabel.Tag.ToString();
+
+            screenConstructor.setDocumentsMainScreenVersion(senderButton, this);
+        }
+
+        public void a_readDocument_button_click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void a_exit_add_file_panel(object sender, EventArgs e)
+        {
+            a_main_screen_main_box_add_file_panel.Visible = false;
+        }
+
+        private void a_image_changed_by_user(object sender, MouseEventArgs e)
+        {
+            this.a_change_image_dialog.ShowDialog();
+        }
+
+        private void a_file_select_by_user(object sender, EventArgs e)
+        {
+            this.a_send_file_dialog.ShowDialog();
+        }
+
+        private void a_send_file(object sender, EventArgs e)
+        {
+            string fileLabel = a_main_screen_main_box_add_file_panel_label_text_box.Text;
+            string fileName = a_send_file_dialog.FileName;
+            foreach(var item in a_main_screen_main_box_add_file_panel_recipients_list_box.SelectedItems)
+            {
+                Server.sendFile(fileLabel, fileName, item.ToString());
+            }
+            a_main_screen_main_box_add_file_panel.Visible = false;
+        }
+
+        private void a_select_file_set(object sender, CancelEventArgs e)
+        {
+            a_main_screen_main_box_add_file_panel_file_name_label.Text = a_send_file_dialog.SafeFileName;
         }
     }
 }

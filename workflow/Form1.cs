@@ -347,6 +347,9 @@ namespace workflow
 
                 a_main_screen_main_box_add_template_panel_info_label.ForeColor = Color.Green;
                 a_main_screen_main_box_add_template_panel_info_label.Text = "Успешно отправлено";
+
+                a_main_screen_main_box_add_template_panel_name_text_box.Text = "";
+                a_main_screen_main_box_add_template_panel_file_name_label.Text = "";
             }
             else
             {
@@ -366,6 +369,7 @@ namespace workflow
             string template = senderButton.Tag.ToString();
 
             Server.deleteTemplate(template);
+
         }
     }
 }

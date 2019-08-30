@@ -933,6 +933,8 @@ namespace workflow
                     downloadTemplate.Tag = elements[num].id;
                     downloadTemplate.Cursor = Cursors.Hand;
                     downloadTemplate.BackColor = SystemColors.ControlLight;
+
+                    downloadTemplate.Click += new EventHandler(connectForm.a_downloadTemplate_button_click);
                 }
 
                 element.Controls.Add(author);

@@ -47,6 +47,19 @@ namespace workflow
         }
     }
 
+    public class Templates
+    {
+        public string author;
+        public string name;
+        public int id;
+
+        public Templates(string _author, string _name, int _id)
+        {
+            this.author = _author;
+            this.name = _name;
+            this.id = _id;
+        }
+    }
 
     public static class Server
     {
@@ -56,9 +69,24 @@ namespace workflow
             return new List<string>() { "Иванов И.И.", "Андропов И.К.", "Зарубин М.Ф.", "Добролюбов М.З.", "Панин М.И.", "Алексеев С.С." };
         }
 
+        public static void downloadDocument(string document)
+        {
+            Console.WriteLine("Download document " + document);
+        }
+
+        public static void downloadTemplate(string template)
+        {
+            Console.WriteLine("Download template " + template);
+        }
+
         public static void sendFile(string label, string path, string recipient)
         {
             Console.WriteLine("Send file " + path + "(" + label + ")" + " to " + recipient);
+        }
+
+        public static void addTemplate(string name, string path)
+        {
+            Console.WriteLine("Add template " + name + " (" + path + ")");
         }
 
         public static void getUser()
@@ -77,12 +105,15 @@ namespace workflow
             Console.WriteLine("Change news : " + contentOfNews);
         }
 
-        public static void deleteNews(object sender)
+        public static void deleteNews(string newsId)
         {
 
-            Button deleteButton = sender as Button;
+            Console.WriteLine("Delete news : " + newsId);
+        }
 
-            Console.WriteLine("Delete news : " + deleteButton.Tag);
+        public static void deleteTemplate(string templateId)
+        {
+            Console.WriteLine("Delete template : " + templateId);
         }
 
         public static List<News> getNews()
@@ -124,6 +155,26 @@ namespace workflow
             contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 8));
             contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 9));
             contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 10));
+
+            return contentMain;
+        }
+
+        public static List<Templates> getTemplates()
+        {
+            List<Templates> contentMain = new List<Templates>();
+
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 1));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 2));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 3));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 4));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 5));
+            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 6));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 7));
+            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 8));
+            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 9));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 10));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 11));
+            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 12));
 
             return contentMain;
         }
@@ -170,7 +221,7 @@ namespace workflow
         static public string name;
 
 
-        static public void set_photo(string photo_src, workflow.login_form connectForm)
+        static public void set_photo(string photo_src, workflow.main_form connectForm)
         {
             int width = (int)connectForm.a_main_screen_left_panel_picture_box.Size.Width;
             var height = (int)connectForm.a_main_screen_left_panel_picture_box.Size.Height;
@@ -179,7 +230,7 @@ namespace workflow
             //Server.update_user_photo();
         }
 
-        static public void set_name(string name, workflow.login_form connectForm)
+        static public void set_name(string name, workflow.main_form connectForm)
         {
             connectForm.a_main_screen_left_panel_name.Text = name;
         }
@@ -201,7 +252,7 @@ namespace workflow
     public class screenConstructor
     {
 
-        public static void setDocumentsMainScreenVersion(string senderButton, workflow.login_form connectForm)
+        public static void setDocumentsMainScreenVersion(string senderButton, workflow.main_form connectForm)
         {
             cleanMainScreenEnvironment(connectForm, false);
 
@@ -210,8 +261,6 @@ namespace workflow
             switch (senderButton)
             {
                 case "a_incoming_messages_button":
-
-                    resetDocumentsLeftPanelButtonsColors("a_incoming_messages_button", connectForm);
 
                     List<Documents> labelDocuments = new List<Documents>() { new Documents("Cтатус", "Автор", "Тема", 0) };
                     List<Documents> contentDocuments = Server.getDocuments();
@@ -227,6 +276,10 @@ namespace workflow
 
                 case "a_send_message_button":
 
+                    connectForm.a_main_screen_main_box_add_file_panel_info_label.Text = "";
+                    connectForm.a_main_screen_main_box_add_file_panel_label_text_box.Text = "";
+                    connectForm.a_main_screen_main_box_add_file_panel_file_name_label.Text = "";
+
                     connectForm.a_main_screen_main_box_add_file_panel_recipients_list_box.Items.Clear();
 
                     foreach(string name in Server.getAllUsers())
@@ -238,15 +291,28 @@ namespace workflow
 
                     break;
 
-                case "a_my_documents_button":
+                case "a_document_templates_button":
+
+                    if (User.getPrivilege("addTemplates"))
+                    {
+                        connectForm.a_main_screen_main_box_add_template_button.Visible = true;
+                    }
+
+                    List<Templates> labelTemplates = new List<Templates>() { new Templates("Автор", "Название", 0) };
+                    List<Templates> contentTemplates = Server.getTemplates();
+                    List<Templates> filledTemplates = labelTemplates.Concat(contentTemplates).ToList();
+
+                    Dictionary<int, Color> propertiesTemplates = new Dictionary<int, Color>(filledTemplates.Count());
+
+                    propertiesTemplates.Add(0, SystemColors.ControlLight);
+
+                    mainBox.addElementsTemplates(filledTemplates, propertiesTemplates, connectForm.a_main_screen_main_box, connectForm);
 
                     break;
-
-
             }
         }
 
-        public static void setBox(Panel box, workflow.login_form connectForm)
+        public static void setBox(Panel box, workflow.main_form connectForm)
         {
 
             if (box == connectForm.a_main_screen_box)
@@ -261,7 +327,7 @@ namespace workflow
             box.Visible = true;
         }
 
-        public static void setBox(GroupBox box, workflow.login_form connectForm)
+        public static void setBox(GroupBox box, workflow.main_form connectForm)
         {
 
             connectForm.a_main_screen_box.Visible = false;
@@ -271,13 +337,13 @@ namespace workflow
             box.Visible = true;
         }
 
-        public static void changeBoxes(Panel prevBox, GroupBox nextBox, workflow.login_form connectForm)
+        public static void changeBoxes(Panel prevBox, GroupBox nextBox, workflow.main_form connectForm)
         {
             prevBox.Visible = false;
             nextBox.Visible = true;
         }
 
-        public static void changeBoxes(Panel prevBox, Panel nextBox, workflow.login_form connectForm)
+        public static void changeBoxes(Panel prevBox, Panel nextBox, workflow.main_form connectForm)
         {
             if (nextBox == connectForm.a_main_screen_box)
             {
@@ -288,13 +354,13 @@ namespace workflow
             nextBox.Visible = true;
         }
 
-        public static void changeBoxes(GroupBox prevBox, GroupBox nextBox, workflow.login_form connectForm)
+        public static void changeBoxes(GroupBox prevBox, GroupBox nextBox, workflow.main_form connectForm)
         {
             prevBox.Visible = false;
             nextBox.Visible = true;
         }
 
-        public static void changeBoxes(GroupBox prevBox, Panel nextBox, workflow.login_form connectForm)
+        public static void changeBoxes(GroupBox prevBox, Panel nextBox, workflow.main_form connectForm)
         {
 
             if (nextBox == connectForm.a_main_screen_box)
@@ -306,7 +372,7 @@ namespace workflow
             nextBox.Visible = true;
         }
 
-        public static void resetTopPanelButtonsColors(Label labelToSetActive, workflow.login_form connectForm)
+        public static void resetTopPanelButtonsColors(Label labelToSetActive, workflow.main_form connectForm)
         {
             connectForm.a_main_screen_top_panel_button1_text.ForeColor = System.Drawing.Color.Black;
             connectForm.a_main_screen_top_panel_button2_text.ForeColor = System.Drawing.Color.Black;
@@ -315,38 +381,46 @@ namespace workflow
             labelToSetActive.ForeColor = System.Drawing.Color.Red;
         }
 
-        public static void resetDocumentsLeftPanelButtonsColors(string labelToSetActive, workflow.login_form connectForm)
+        public static void resetDocumentsLeftPanelButtonsColors(string labelToSetActive, workflow.main_form connectForm)
         {
             User.systemData["a_send_message_button"].ForeColor = System.Drawing.Color.Black;
             User.systemData["a_incoming_messages_button"].ForeColor = System.Drawing.Color.Black;
-            User.systemData["a_my_documents_button"].ForeColor = System.Drawing.Color.Black;
+            User.systemData["a_document_templates_button"].ForeColor = System.Drawing.Color.Black;
 
             User.systemData[labelToSetActive].ForeColor = System.Drawing.Color.Red;
         }
 
-        public static void cleanMainScreenEnvironment(workflow.login_form connectForm, bool clearLeft = true)
+        public static void cleanMainScreenEnvironment(workflow.main_form connectForm, bool clearLeft = true)
         {
             if(clearLeft) connectForm.a_main_screen_left_panel_custom_box.Controls.Clear();
 
+            connectForm.a_main_screen_main_box.AutoScrollPosition = new Point(0, 0);
+
+            Panel a_main_screen_main_box_add_template_panel = connectForm.a_main_screen_main_box_add_template_panel; //Сохраняем панель 'Добавить шаблон'
             Panel a_main_screen_main_box_add_file_panel = connectForm.a_main_screen_main_box_add_file_panel; //Сохраняем панель 'Добавить файл'
             Panel a_main_screen_main_box_change_news_panel = connectForm.a_main_screen_main_box_change_news_panel; //Cохраняем панель 'Изменить новость'
             Panel a_main_screen_main_box_add_news_panel = connectForm.a_main_screen_main_box_add_news_panel;  //Cохраняем панель 'Добавить новость'
             Panel a_main_screen_main_box_add_news_button = connectForm.a_main_screen_main_box_add_news_button; //Cохраняем кнопку 'Добавить новость'
+            Panel a_main_screen_main_box_add_template_button = connectForm.a_main_screen_main_box_add_template_button; //Сохраняем кнопку 'Добавить шаблон'
 
             connectForm.a_main_screen_main_box.Controls.Clear();
 
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_template_panel); //Возвращаем панель 'Добавить шаблон'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_file_panel); //Возвращаем панель 'Добавить файл'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_change_news_panel); //Возвращаем панель 'Изменить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_panel); //Возвращаем панель 'Добавить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_button); //Возвращаем кнопку 'Добавить новость'
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_template_button); //Возвращаем кнопку 'Добавить шаблон'
 
+            connectForm.a_main_screen_main_box_add_template_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_file_panel.Visible = false;
             connectForm.a_main_screen_main_box_change_news_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_news_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_news_button.Visible = false;
+            connectForm.a_main_screen_main_box_add_template_button.Visible = false;
         }
 
-        public static void changeMainScreenEnvironment(string environment, workflow.login_form connectForm)
+        public static void changeMainScreenEnvironment(string environment, workflow.main_form connectForm)
         {
 
             cleanMainScreenEnvironment(connectForm);
@@ -397,8 +471,8 @@ namespace workflow
 
                     //--------------------------- left screen changes
 
-                    List<string> filledLeftDocuments = new List<string>() { "Отправить документ", "Входящие документы", "Мои документы" };
-                    List<string> filledLeftDocumentsNames = new List<string>() { "a_send_message_button", "a_incoming_messages_button", "a_my_documents_button" };
+                    List<string> filledLeftDocuments = new List<string>() { "Отправить документ", "Входящие документы", "Шаблоны документов" };
+                    List<string> filledLeftDocumentsNames = new List<string>() { "a_send_message_button", "a_incoming_messages_button", "a_document_templates_button" };
 
                     Dictionary<int, ContentAlignment> propertiesLeftDocuments = new Dictionary<int, ContentAlignment>(filledLeftDocuments.Count());
 
@@ -428,7 +502,7 @@ namespace workflow
     public class customBox
     {
 
-        public static void addElements(List<string> elements, Dictionary<int, ContentAlignment> properties, Panel customBox, workflow.login_form connectForm , string environment, List<string> customNames = null)
+        public static void addElements(List<string> elements, Dictionary<int, ContentAlignment> properties, Panel customBox, workflow.main_form connectForm , string environment, List<string> customNames = null)
         {
             int countOfElements = elements.Count();
 
@@ -454,7 +528,7 @@ namespace workflow
 
                 labelOnElement.AutoSize = false;
                 labelOnElement.Size = new Size(widthOfElements, heightOfElements);
-                labelOnElement.Font = new Font("Microsoft San Serif", 10);
+                labelOnElement.Font = new Font("Microsoft San Serif", 8);
 
                 if (environment == "documents")
                 {
@@ -488,7 +562,7 @@ namespace workflow
 
     public class mainBox
     {
-        public static void addElementsMain(List<News> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.login_form connectForm)
+        public static void addElementsMain(List<News> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.main_form connectForm)
         {
             int countOfElements = elements.Count();
 
@@ -559,32 +633,60 @@ namespace workflow
                 xPositionIncide += widthOfElementIncide - 1;
 
                 Label content = new Label();
-                content.Text = elements[num].content;
-                widthOfElementIncide = widthOfElements / 10 * 7;
-                heightOfElementIncide = element.Size.Height;
-                content.Size = new Size(widthOfElementIncide, heightOfElementIncide);
-                content.Location = new Point(xPositionIncide, 0);
-                content.BorderStyle = BorderStyle.FixedSingle;
-                content.TextAlign = ContentAlignment.MiddleCenter;
-                xPositionIncide += widthOfElementIncide - 1;
+                Panel buttonBox = new Panel();
+                Button deleteNews = new Button();
 
                 if (User.name == elements[num].author)
                 {
-                    Button deleteNews = new Button();
+                    //Добавляем content
+
+                    content.Text = elements[num].content;
+                    widthOfElementIncide = widthOfElements / 10 * 6;
+                    heightOfElementIncide = element.Size.Height;
+                    content.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    content.Location = new Point(xPositionIncide, 0);
+                    content.BorderStyle = BorderStyle.FixedSingle;
+                    content.TextAlign = ContentAlignment.MiddleCenter;
+                    xPositionIncide += widthOfElementIncide - 1;
+
+                    //Добавляем панель для кнопки удаления
+
+                    widthOfElementIncide = widthOfElements / 10 * 1 + 1;
+                    heightOfElementIncide = element.Size.Height;
+                    buttonBox.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    buttonBox.Location = new Point(xPositionIncide, 0);
+                    buttonBox.BorderStyle = BorderStyle.FixedSingle;
+                    xPositionIncide += widthOfElementIncide - 1;
+
+                    //Добавляем кнопку удаления
+
+                    deleteNews.FlatStyle = FlatStyle.Flat;
                     deleteNews.Text = "x";
                     widthOfElementIncide = 22;
                     heightOfElementIncide = 22;
                     deleteNews.Size = new Size(widthOfElementIncide, heightOfElementIncide);
-                    deleteNews.Location = new Point(xPositionIncide - widthOfElementIncide, 0);
+                    deleteNews.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                     deleteNews.Tag = elements[num].id;
                     deleteNews.Cursor = Cursors.Hand;
                     deleteNews.BackColor = SystemColors.ControlLight;
 
                     deleteNews.Click += new EventHandler(connectForm.a_deleteNews_button_click);
 
+                    buttonBox.Controls.Add(deleteNews);
+                    element.Controls.Add(buttonBox);
 
-                    element.Controls.Add(deleteNews);
-                };
+                }
+                else
+                {
+                    content.Text = elements[num].content;
+                    widthOfElementIncide = widthOfElements / 10 * 7;
+                    heightOfElementIncide = element.Size.Height;
+                    content.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    content.Location = new Point(xPositionIncide, 0);
+                    content.BorderStyle = BorderStyle.FixedSingle;
+                    content.TextAlign = ContentAlignment.MiddleCenter;
+                    xPositionIncide += widthOfElementIncide - 1;
+                }
 
                 element.Controls.Add(author);
                 element.Controls.Add(time);
@@ -597,7 +699,7 @@ namespace workflow
             }
         }
 
-        public static void addElementsDocuments(List<Documents> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.login_form connectForm)
+        public static void addElementsDocuments(List<Documents> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.main_form connectForm)
         {
             int countOfElements = elements.Count();
 
@@ -650,20 +752,29 @@ namespace workflow
 
                 Label label = new Label();
                 label.Text = elements[num].label;
-                widthOfElementIncide = widthOfElements / 10 * 5;
+                widthOfElementIncide = widthOfElements / 10 * 4;
                 heightOfElementIncide = element.Size.Height;
                 label.Size = new Size(widthOfElementIncide, heightOfElementIncide);
                 label.Location = new Point(xPositionIncide, 0);
                 label.BorderStyle = BorderStyle.FixedSingle;
                 label.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Panel buttonBox = new Panel();
+                widthOfElementIncide = widthOfElements / 10 * 1;
+                heightOfElementIncide = element.Size.Height;
+                buttonBox.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                buttonBox.Location = new Point(xPositionIncide, 0);
+                buttonBox.BorderStyle = BorderStyle.FixedSingle;
                 xPositionIncide += widthOfElementIncide;
 
                 Button readDocument = new Button();
+                readDocument.FlatStyle = FlatStyle.Flat;
                 readDocument.Text = ">";
                 widthOfElementIncide = 22;
                 heightOfElementIncide = 22;
                 readDocument.Size = new Size(widthOfElementIncide, heightOfElementIncide);
-                readDocument.Location = new Point(xPositionIncide - widthOfElementIncide - 10, element.Size.Height / 2 - heightOfElementIncide);
+                readDocument.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                 readDocument.Tag = elements[num].id;
                 readDocument.Cursor = Cursors.Hand;
                 readDocument.BackColor = SystemColors.ControlLight;
@@ -678,12 +789,167 @@ namespace workflow
                 else
                 {
                     element.Size = new Size(widthOfElements, heightOfElements);
-                    element.Controls.Add(readDocument); //Если не служебный элемент - добавляем кнопку
+                    buttonBox.Controls.Add(readDocument); //Если не служебный элемент - добавляем кнопку
                 }
 
                 element.Controls.Add(author);
                 element.Controls.Add(read);
                 element.Controls.Add(label);
+                element.Controls.Add(buttonBox);
+
+                yPosition += element.Size.Height + yMargin;
+                mainBox.Controls.Add(element);
+
+            }
+        }
+
+        public static void addElementsTemplates(List<Templates> elements, Dictionary<int, Color> properties, Panel mainBox, workflow.main_form connectForm)
+        {
+
+            int countOfElements = elements.Count();
+
+            int width = mainBox.Size.Width;
+            int height = mainBox.Size.Height;
+
+            int xMargin = 24;
+            int topYMargin = 30;
+            int yMargin = -1; //Контролирует отступы между строчками, при -1 border накладываются друг на друга
+
+            int widthOfElements = width - xMargin * 2;
+            int heightOfElements = 50;
+            int heightOfCustomElements = 50;
+
+            int xPosition = xMargin;
+            int yPosition = topYMargin;
+
+            int widthOfElementIncide = 0;
+            int heightOfElementIncide = 0;
+
+
+            for (int num = 0; num < elements.Count(); num++)
+            {
+
+                Panel element = new Panel();
+                element.Location = new Point(xPosition, yPosition);
+                element.Size = new Size(widthOfElements, heightOfElements);
+
+                int xPositionIncide = 0;
+
+                Label author = new Label();
+                author.Text = elements[num].author;
+                widthOfElementIncide = widthOfElements / 10 * 4;
+                heightOfElementIncide = element.Size.Height;
+                author.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                author.Location = new Point(xPositionIncide, 0);
+                author.BorderStyle = BorderStyle.FixedSingle;
+                author.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Label name = new Label();
+                name.Text = elements[num].name;
+                widthOfElementIncide = widthOfElements / 10 * 4;
+                heightOfElementIncide = element.Size.Height;
+                name.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                name.Location = new Point(xPositionIncide, 0);
+                name.BorderStyle = BorderStyle.FixedSingle;
+                name.TextAlign = ContentAlignment.MiddleCenter;
+                xPositionIncide += widthOfElementIncide - 1;
+
+                Panel buttonBox = new Panel();
+                Panel deleteButtonBox = new Panel();
+                Button downloadTemplate = new Button();
+                Button deleteTemplate = new Button();
+
+                if (User.name == elements[num].author)
+                {
+
+                    //Добавляем панель для кнопки загрузки
+
+                    widthOfElementIncide = widthOfElements / 10 * 1;
+                    heightOfElementIncide = element.Size.Height;
+                    buttonBox.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    buttonBox.Location = new Point(xPositionIncide, 0);
+                    buttonBox.BorderStyle = BorderStyle.FixedSingle;
+                    xPositionIncide += widthOfElementIncide - 1;
+
+                    //Добавляем кнопку загрузки
+
+                    downloadTemplate.FlatStyle = FlatStyle.Flat;
+                    downloadTemplate.Text = ">";
+                    widthOfElementIncide = 22;
+                    heightOfElementIncide = 22;
+                    downloadTemplate.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    downloadTemplate.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
+                    downloadTemplate.Tag = elements[num].id;
+                    downloadTemplate.Cursor = Cursors.Hand;
+                    downloadTemplate.BackColor = SystemColors.ControlLight;
+
+                    downloadTemplate.Click += new EventHandler(connectForm.a_downloadTemplate_button_click);
+
+                    //Добавляем панель для кнопки удаления
+
+                    widthOfElementIncide = widthOfElements / 10 * 1 + 1;
+                    heightOfElementIncide = element.Size.Height;
+                    deleteButtonBox.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    deleteButtonBox.Location = new Point(xPositionIncide, 0);
+                    deleteButtonBox.BorderStyle = BorderStyle.FixedSingle;
+                    xPositionIncide += widthOfElementIncide;
+
+                    //Добавляем кнопку удаления
+
+                    deleteTemplate.FlatStyle = FlatStyle.Flat;
+                    deleteTemplate.Text = "x";
+                    widthOfElementIncide = 22;
+                    heightOfElementIncide = 22;
+                    deleteTemplate.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    deleteTemplate.Location = new Point(deleteButtonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
+                    deleteTemplate.Tag = elements[num].id;
+                    deleteTemplate.Cursor = Cursors.Hand;
+                    deleteTemplate.BackColor = SystemColors.ControlLight;
+
+                    deleteTemplate.Click += new EventHandler(connectForm.a_deleteTemplate_button_click);
+                    deleteButtonBox.Controls.Add(deleteTemplate);
+                }
+                else
+                {
+
+                    //Добавляем панель для кнопки загрузки
+
+                    widthOfElementIncide = widthOfElements / 10 * 2;
+                    heightOfElementIncide = element.Size.Height;
+                    buttonBox.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    buttonBox.Location = new Point(xPositionIncide, 0);
+                    buttonBox.BorderStyle = BorderStyle.FixedSingle;
+                    xPositionIncide += widthOfElementIncide;
+
+                    //Добавляем кнопку загрузки
+
+                    downloadTemplate.FlatStyle = FlatStyle.Flat;
+                    downloadTemplate.Text = ">";
+                    widthOfElementIncide = 22;
+                    heightOfElementIncide = 22;
+                    downloadTemplate.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                    downloadTemplate.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
+                    downloadTemplate.Tag = elements[num].id;
+                    downloadTemplate.Cursor = Cursors.Hand;
+                    downloadTemplate.BackColor = SystemColors.ControlLight;
+                }
+
+                element.Controls.Add(author);
+                element.Controls.Add(name);
+                element.Controls.Add(buttonBox);
+                element.Controls.Add(deleteButtonBox);
+
+                if (properties.ContainsKey(num))
+                {
+                    element.BackColor = properties[num];
+                    element.Size = new Size(widthOfElements, heightOfCustomElements);
+                }
+                else
+                {
+                    element.Size = new Size(widthOfElements, heightOfElements);
+                    buttonBox.Controls.Add(downloadTemplate); //Если не служебный элемент - добавляем кнопку
+                }
 
                 yPosition += element.Size.Height + yMargin;
                 mainBox.Controls.Add(element);
@@ -702,7 +968,7 @@ namespace workflow
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new login_form());
+            Application.Run(new main_form());
         }
     }
 }

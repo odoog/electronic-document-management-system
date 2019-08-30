@@ -11,9 +11,9 @@ using System.Windows.Forms;
 namespace workflow
 {
 
-    public partial class login_form : Form
+    public partial class main_form : Form
     {
-        public login_form()
+        public main_form()
         {
             InitializeComponent();
         }
@@ -30,7 +30,7 @@ namespace workflow
 
             Server.getUser();
 
-            User.set_name("Петров И. И.", this);
+            User.set_name("Иванов И. И.", this);
 
             screenConstructor.setBox(a_main_screen_box, this);
 
@@ -188,6 +188,9 @@ namespace workflow
         public void a_add_news_button_click(object sender, EventArgs e)
         {
             Console.WriteLine("Add news");
+            a_main_screen_main_box_add_news_panel_info_label.Text = "";
+            a_main_screen_main_box_add_news_panel_news_content_text_box.Text = "";
+            a_main_screen_main_box_add_news_panel_news_label_text_box.Text = "";
             a_main_screen_main_box_add_news_panel.Visible = true;
         }
 
@@ -196,9 +199,21 @@ namespace workflow
             string label_of_news = a_main_screen_main_box_add_news_panel_news_label_text_box.Text;
             string content_of_news = a_main_screen_main_box_add_news_panel_news_content_text_box.Text;
 
-            Server.addNews(label_of_news, content_of_news);
+            if(label_of_news != "" && content_of_news != "")
+            {
+                Server.addNews(label_of_news, content_of_news);
 
-            a_main_screen_main_box_add_news_panel.Visible = false;
+                a_main_screen_main_box_add_news_panel_info_label.ForeColor = Color.Green;
+                a_main_screen_main_box_add_news_panel_info_label.Text = "Успешно опубликовано";
+                
+                a_main_screen_main_box_add_news_panel_news_content_text_box.Text = ""; //Сбрасываем text и label чтобы пользователь понял, что новость опубликована
+                a_main_screen_main_box_add_news_panel_news_label_text_box.Text = "";
+            }
+            else
+            {
+                a_main_screen_main_box_add_news_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_news_panel_info_label.Text = "Проверьте правильность введенных данных";
+            }
         }
 
         private void a_exit_add_news_panel(object sender, EventArgs e)
@@ -208,7 +223,10 @@ namespace workflow
 
         public void a_deleteNews_button_click(object sender, EventArgs e)
         {
-            Server.deleteNews(sender);
+            Button senderButton = sender as Button;
+            string news = senderButton.Tag.ToString();
+
+            Server.deleteNews(news);
         }
 
         private void a_change_main_news_button_click(object sender, EventArgs e)
@@ -240,6 +258,10 @@ namespace workflow
         public void a_readDocument_button_click(object sender, EventArgs e)
         {
 
+            Button senderButton = sender as Button;
+            string document = senderButton.Tag.ToString();
+
+            Server.downloadDocument(document);
         }
 
         private void a_exit_add_file_panel(object sender, EventArgs e)
@@ -261,16 +283,89 @@ namespace workflow
         {
             string fileLabel = a_main_screen_main_box_add_file_panel_label_text_box.Text;
             string fileName = a_send_file_dialog.FileName;
-            foreach(var item in a_main_screen_main_box_add_file_panel_recipients_list_box.SelectedItems)
+
+            if(fileLabel != "" && fileName != "a_selected_file")
             {
-                Server.sendFile(fileLabel, fileName, item.ToString());
+                foreach (var item in a_main_screen_main_box_add_file_panel_recipients_list_box.SelectedItems)
+                {
+                    Server.sendFile(fileLabel, fileName, item.ToString());
+                }
+
+                a_main_screen_main_box_add_file_panel_info_label.ForeColor = Color.Green;
+                a_main_screen_main_box_add_file_panel_info_label.Text = "Успешно отправлено";
             }
-            a_main_screen_main_box_add_file_panel.Visible = false;
+            else
+            {
+                a_main_screen_main_box_add_file_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_file_panel_info_label.Text = "Проверьте правильность введенных данных";
+            }
+            
         }
 
         private void a_select_file_set(object sender, CancelEventArgs e)
         {
             a_main_screen_main_box_add_file_panel_file_name_label.Text = a_send_file_dialog.SafeFileName;
+        }
+
+        public void a_downloadTemplate_button_click(object sender, EventArgs e)
+        {
+            Button senderButton = sender as Button;
+            string template = senderButton.Tag.ToString();
+
+            Server.downloadTemplate(template);
+        }
+
+        private void a_add_template_button_click(object sender, EventArgs e)
+        {
+
+            a_main_screen_main_box_add_template_panel_info_label.Text = "";
+            a_main_screen_main_box_add_template_panel_name_text_box.Text = "";
+            a_main_screen_main_box_add_template_panel_file_name_label.Text = "";
+
+            a_main_screen_main_box_add_template_panel.Visible = true;
+        }
+
+        private void a_exit_add_template_panel(object sender, EventArgs e)
+        {
+            a_main_screen_main_box_add_template_panel.Visible = false;
+        }
+
+        private void a_select_template_set(object sender, CancelEventArgs e)
+        {
+            a_main_screen_main_box_add_template_panel_file_name_label.Text = a_send_template_dialog.SafeFileName;
+        }
+
+        private void a_send_template(object sender, EventArgs e)
+        {
+            string templateLabel = a_main_screen_main_box_add_template_panel_name_text_box.Text;
+            string templateName = a_send_template_dialog.FileName;
+
+            if (templateLabel != "" && templateName != "a_selected_file")
+            {
+
+                Server.addTemplate(templateLabel, templateName);
+
+                a_main_screen_main_box_add_template_panel_info_label.ForeColor = Color.Green;
+                a_main_screen_main_box_add_template_panel_info_label.Text = "Успешно отправлено";
+            }
+            else
+            {
+                a_main_screen_main_box_add_template_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_template_panel_info_label.Text = "Проверьте правильность введенных данных";
+            }
+        }
+
+        private void a_template_select_by_user(object sender, EventArgs e)
+        {
+            this.a_send_template_dialog.ShowDialog();
+        }
+
+        public void a_deleteTemplate_button_click(object sender, EventArgs e)
+        {
+            Button senderButton = sender as Button;
+            string template = senderButton.Tag.ToString();
+
+            Server.deleteTemplate(template);
         }
     }
 }

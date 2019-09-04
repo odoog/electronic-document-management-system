@@ -64,6 +64,54 @@ namespace workflow
     public static class Server
     {
 
+        public static void addNewChat()
+        {
+            Console.WriteLine("Add new chat");
+        }
+
+        public static void addUserToConversation(string user, string conversationId)
+        {
+            Console.WriteLine("Add user " + user + " to conversation with id " + conversationId);
+        }
+
+        public static void updateConversationName(string newName, string conversationId)
+        {
+            Console.WriteLine("Change name to " + newName + " in conversation with id " + conversationId);
+        }
+
+        public static void leaveConversation(string conversationId)
+        {
+            Console.WriteLine("Leave conversation for " + User.name + " in conversation with id " + conversationId);
+        }
+
+        public static void sendMessage(string text)
+        {
+            Console.WriteLine("Send '" + text + "' to conversation with id " + User.currentConversationId);
+        }
+
+        public static void updateUsersConversations()
+        {
+            List<Message> messages = new List<Message>();
+            List<Conversation> conversations = new List<Conversation>();
+  
+            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 0));
+            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 1));
+            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 2));
+            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 3));
+            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 4));
+            messages.Add(new Message("Сергеев И.И", "Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут", 5));
+            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 6));
+            messages.Add(new Message("Ижик И.И", "Привет, тестируем сообщения тут", 7));
+            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 8));
+
+            for(int i = 0; i < 10; i ++)
+            {
+                conversations.Add(new Conversation("Беседа " + i.ToString(), messages, i));
+            }
+
+            User.conversations = conversations;
+        }
+
         public static List<string> getAllUsers()
         {
             return new List<string>() { "Иванов И.И.", "Андропов И.К.", "Зарубин М.Ф.", "Добролюбов М.З.", "Панин М.И.", "Алексеев С.С." };
@@ -213,13 +261,43 @@ namespace workflow
 
     }
 
+    public class Message
+    {
+        public string author;
+        public string text;
+        public int id;
+
+        public Message(string _author, string _text, int _id)
+        {
+            this.author = _author;
+            this.text = _text;
+            this.id = _id;
+        }
+    }
+
+    public class Conversation
+    {
+
+        public List<Message> messages;
+        public string name;
+        public int id;
+
+        public Conversation(string _name, List<Message> _messages, int _id)
+        {
+            this.name = _name;
+            this.messages = _messages;
+            this.id = _id;
+        }
+    }
+
     public class User
     {
         static public Dictionary<string, Label> systemData; //Хранятся указатели на DocumentsLeftPanelButtons
 
+        static public List<Conversation> conversations;
         static public List<string> shedule;
         static public string name;
-
+        static public string currentConversationId;
 
         static public void set_photo(string photo_src, workflow.main_form connectForm)
         {
@@ -239,13 +317,6 @@ namespace workflow
         {
             return true;
         }
-
-    }
-
-    public class helpToDraw
-    {
-
-
 
     }
 
@@ -310,6 +381,40 @@ namespace workflow
 
                     break;
             }
+        }
+
+        public static void setChatsMainScreenVersion(string senderButton, workflow.main_form connectForm)
+        {
+
+
+            User.currentConversationId = senderButton;
+            Console.WriteLine("ID : " + senderButton);
+
+            cleanMainScreenEnvironment(connectForm, false);
+
+            resetChatsLeftPanelButtonsColors(connectForm);
+
+            connectForm.a_main_screen_main_box_chats_mode_main_panel.Visible = true;
+            connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = true;
+
+            connectForm.a_main_screen_main_box_chats_mode_main_panel.Controls.Clear(); //Удаляем все прошлые сообщения
+
+            Conversation currentConversation = null;
+
+            foreach (Conversation conversation in User.conversations)
+            {
+                if(conversation.id.ToString() == User.currentConversationId)
+                {
+                    currentConversation = conversation;
+                    break;
+                }
+            }
+
+            List<Message> messagesInDialog = currentConversation.messages;
+
+            int yPosition = mainBox.addElementsChats(messagesInDialog, currentConversation, connectForm.a_main_screen_main_box_chats_mode_main_panel, connectForm);
+
+            connectForm.a_main_screen_main_box_chats_mode_main_panel.AutoScrollPosition = new Point(0, yPosition);
         }
 
         public static void setBox(Panel box, workflow.main_form connectForm)
@@ -390,6 +495,16 @@ namespace workflow
             User.systemData[labelToSetActive].ForeColor = System.Drawing.Color.Red;
         }
 
+        public static void resetChatsLeftPanelButtonsColors(workflow.main_form connectForm)
+        {
+            foreach(Conversation conversation in User.conversations)
+            {
+                User.systemData[conversation.id.ToString()].ForeColor = System.Drawing.Color.Black;
+            }
+
+            User.systemData[User.currentConversationId].ForeColor = System.Drawing.Color.Red;
+        }
+
         public static void cleanMainScreenEnvironment(workflow.main_form connectForm, bool clearLeft = true)
         {
             if(clearLeft) connectForm.a_main_screen_left_panel_custom_box.Controls.Clear();
@@ -402,6 +517,11 @@ namespace workflow
             Panel a_main_screen_main_box_add_news_panel = connectForm.a_main_screen_main_box_add_news_panel;  //Cохраняем панель 'Добавить новость'
             Panel a_main_screen_main_box_add_news_button = connectForm.a_main_screen_main_box_add_news_button; //Cохраняем кнопку 'Добавить новость'
             Panel a_main_screen_main_box_add_template_button = connectForm.a_main_screen_main_box_add_template_button; //Сохраняем кнопку 'Добавить шаблон'
+            Panel a_dark_background = connectForm.a_dark_background; //Сохраняем dark background
+            Panel a_conversation_options_panel = connectForm.a_conversation_options_panel;
+
+            Panel a_main_screen_main_box_chats_mode_main_panel = connectForm.a_main_screen_main_box_chats_mode_main_panel; //Сохраняем панель 'Чаты -> главная'
+            Panel a_main_screen_main_box_chats_mode_interface_panel = connectForm.a_main_screen_main_box_chats_mode_interface_panel; //Сохраняем панель 'Чаты -> интерфейс'
 
             connectForm.a_main_screen_main_box.Controls.Clear();
 
@@ -411,6 +531,11 @@ namespace workflow
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_panel); //Возвращаем панель 'Добавить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_news_button); //Возвращаем кнопку 'Добавить новость'
             connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_add_template_button); //Возвращаем кнопку 'Добавить шаблон'
+            connectForm.a_main_screen_main_box.Controls.Add(a_dark_background); //Возвращаем dark background
+            connectForm.a_main_screen_main_box.Controls.Add(a_conversation_options_panel);
+
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_chats_mode_main_panel); //Возвращаем панель 'Чаты -> главная'
+            connectForm.a_main_screen_main_box.Controls.Add(a_main_screen_main_box_chats_mode_interface_panel); //Возвращаем панель 'Чаты -> интерфейс'
 
             connectForm.a_main_screen_main_box_add_template_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_file_panel.Visible = false;
@@ -418,6 +543,10 @@ namespace workflow
             connectForm.a_main_screen_main_box_add_news_panel.Visible = false;
             connectForm.a_main_screen_main_box_add_news_button.Visible = false;
             connectForm.a_main_screen_main_box_add_template_button.Visible = false;
+            connectForm.a_conversation_options_panel.Visible = false;
+
+            connectForm.a_main_screen_main_box_chats_mode_main_panel.Visible = false;
+            connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = false;
         }
 
         public static void changeMainScreenEnvironment(string environment, workflow.main_form connectForm)
@@ -491,7 +620,38 @@ namespace workflow
 
                 case "chats":
 
+                    User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
+
                     resetTopPanelButtonsColors(connectForm.a_main_screen_top_panel_button3_text, connectForm);
+
+                    //--------------------------- left screen changes
+
+                    List<string> labelLeftChats = new List<string>() { "Беседы: " };
+                    List<string> conversationNames = new List<string>();
+                    List<string> labelLeftChatsAfter = new List<string>() { "+ Добавить беседу" };
+                    List<string> filledLeftChatsNames = new List<string>();
+
+                    foreach (var item in User.conversations){
+                        conversationNames.Add(item.name);
+                        filledLeftChatsNames.Add(item.id.ToString());
+                    }
+
+                    List<string> contentLeftChats = conversationNames;
+                    List<string> filledLeftChats = labelLeftChats.Concat(contentLeftChats).Concat(labelLeftChatsAfter).ToList();
+
+                    Dictionary<int, ContentAlignment> propertiesLeftChats = new Dictionary<int, ContentAlignment>(filledLeftChats.Count());
+
+                    propertiesLeftChats.Add(0, ContentAlignment.MiddleCenter);
+                    propertiesLeftChats.Add(filledLeftChats.Count() - 1, ContentAlignment.MiddleCenter);
+
+                    customBox.addElements(filledLeftChats, propertiesLeftChats, connectForm.a_main_screen_left_panel_custom_box, connectForm, environment, filledLeftChatsNames);
+
+                    //--------------------------- main screen changes
+
+                    connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = true;
+                    connectForm.a_main_screen_main_box_chats_mode_main_panel.Visible = true;
+
+                    screenConstructor.setChatsMainScreenVersion(User.conversations[0].id.ToString(), connectForm);
 
                     Console.WriteLine("Change environment : chats");
                     break;
@@ -510,7 +670,20 @@ namespace workflow
             int height = customBox.Size.Height;
 
             int widthOfElements = width;
-            int heightOfElements = height / countOfElements;
+
+            int heightOfElements = 0;
+
+            int notServiceElementsCount = 0;
+
+            if(environment == "chats")
+            {
+                heightOfElements = 40; //fixed size у названий чатов
+                widthOfElements = widthOfElements - 17; //Полоса прокрутки сьедает 17px
+            }
+            else
+            {
+                heightOfElements = height / countOfElements;
+            }
 
             int xPosition = 0;
             int yPosition = 0;
@@ -536,6 +709,21 @@ namespace workflow
                     labelOnElement.Cursor = Cursors.Hand;
                     labelOnElement.Click += new EventHandler(connectForm.a_documents_left_panel_button_click);
                     User.systemData.Add(customNames[num], labelOnElement);
+                }
+
+                if(environment == "chats" && !properties.ContainsKey(num))//Если есть в properties - то он служебный
+                {
+                    User.systemData.Add(customNames[notServiceElementsCount], labelOnElement);
+                    labelOnElement.Tag = customNames[notServiceElementsCount]; //Скипаем служебные элементы, поэтому собственный счетчик
+                    notServiceElementsCount++;
+                    labelOnElement.Cursor = Cursors.Hand;
+                    labelOnElement.Click += new EventHandler(connectForm.a_chats_left_panel_button_click);
+                }
+
+                if(environment == "chats" && num == elements.Count() - 1)
+                {
+                    labelOnElement.Click += new EventHandler(connectForm.a_chats_left_panel_add_chat_button_click);
+                    labelOnElement.Cursor = Cursors.Hand;
                 }
 
                 if (properties.ContainsKey(num))
@@ -661,6 +849,7 @@ namespace workflow
                     //Добавляем кнопку удаления
 
                     deleteNews.FlatStyle = FlatStyle.Flat;
+                    deleteNews.FlatAppearance.BorderSize = 0;
                     deleteNews.Text = "x";
                     widthOfElementIncide = 22;
                     heightOfElementIncide = 22;
@@ -668,7 +857,6 @@ namespace workflow
                     deleteNews.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                     deleteNews.Tag = elements[num].id;
                     deleteNews.Cursor = Cursors.Hand;
-                    deleteNews.BackColor = SystemColors.ControlLight;
 
                     deleteNews.Click += new EventHandler(connectForm.a_deleteNews_button_click);
 
@@ -770,6 +958,7 @@ namespace workflow
 
                 Button readDocument = new Button();
                 readDocument.FlatStyle = FlatStyle.Flat;
+                readDocument.FlatAppearance.BorderSize = 0;
                 readDocument.Text = ">";
                 widthOfElementIncide = 22;
                 heightOfElementIncide = 22;
@@ -777,7 +966,6 @@ namespace workflow
                 readDocument.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                 readDocument.Tag = elements[num].id;
                 readDocument.Cursor = Cursors.Hand;
-                readDocument.BackColor = SystemColors.ControlLight;
 
                 readDocument.Click += new EventHandler(connectForm.a_readDocument_button_click);
 
@@ -875,6 +1063,7 @@ namespace workflow
                     //Добавляем кнопку загрузки
 
                     downloadTemplate.FlatStyle = FlatStyle.Flat;
+                    downloadTemplate.FlatAppearance.BorderSize = 0;
                     downloadTemplate.Text = ">";
                     widthOfElementIncide = 22;
                     heightOfElementIncide = 22;
@@ -882,7 +1071,6 @@ namespace workflow
                     downloadTemplate.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                     downloadTemplate.Tag = elements[num].id;
                     downloadTemplate.Cursor = Cursors.Hand;
-                    downloadTemplate.BackColor = SystemColors.ControlLight;
 
                     downloadTemplate.Click += new EventHandler(connectForm.a_downloadTemplate_button_click);
 
@@ -898,6 +1086,7 @@ namespace workflow
                     //Добавляем кнопку удаления
 
                     deleteTemplate.FlatStyle = FlatStyle.Flat;
+                    deleteTemplate.FlatAppearance.BorderSize = 0;
                     deleteTemplate.Text = "x";
                     widthOfElementIncide = 22;
                     heightOfElementIncide = 22;
@@ -905,7 +1094,6 @@ namespace workflow
                     deleteTemplate.Location = new Point(deleteButtonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                     deleteTemplate.Tag = elements[num].id;
                     deleteTemplate.Cursor = Cursors.Hand;
-                    deleteTemplate.BackColor = SystemColors.ControlLight;
 
                     deleteTemplate.Click += new EventHandler(connectForm.a_deleteTemplate_button_click);
                     deleteButtonBox.Controls.Add(deleteTemplate);
@@ -925,6 +1113,7 @@ namespace workflow
                     //Добавляем кнопку загрузки
 
                     downloadTemplate.FlatStyle = FlatStyle.Flat;
+                    downloadTemplate.FlatAppearance.BorderSize = 0;
                     downloadTemplate.Text = ">";
                     widthOfElementIncide = 22;
                     heightOfElementIncide = 22;
@@ -932,7 +1121,6 @@ namespace workflow
                     downloadTemplate.Location = new Point(buttonBox.Size.Width / 2 - widthOfElementIncide / 2, element.Size.Height / 2 - heightOfElementIncide / 2);
                     downloadTemplate.Tag = elements[num].id;
                     downloadTemplate.Cursor = Cursors.Hand;
-                    downloadTemplate.BackColor = SystemColors.ControlLight;
 
                     downloadTemplate.Click += new EventHandler(connectForm.a_downloadTemplate_button_click);
                 }
@@ -957,6 +1145,90 @@ namespace workflow
                 mainBox.Controls.Add(element);
 
             }
+        }
+
+        public static int addElementsChats(List<Message> elements, Conversation conversation, Panel mainBox, workflow.main_form connectForm)
+        {
+            int countOfElements = elements.Count();
+
+            int width = mainBox.Size.Width;
+            int height = mainBox.Size.Height;
+
+            int yMargin = 3; //Контролирует отступы между строчками, при -1 border накладываются друг на друга
+
+            int widthOfElements = width / 3;
+
+            Func<int, int> xPositionAuthor1 = (x) => 0;
+            Func<int, int> xPositionAuthor2 = (x) => width - x - 17;
+
+            int widthOfElementIncide = 0;
+            int heightOfElementIncide = 0;
+
+            int yPositionIncide = 0;
+
+            int yPosition = yMargin;
+
+            for (int num = 0; num < elements.Count(); num++)
+            {
+
+                yPositionIncide = 0;
+
+                Panel element = new Panel();
+
+                Label text = new Label();
+                text.Text = elements[num].text;
+
+                element.Size = new Size(text.GetPreferredSize(new Size(widthOfElements, 0)).Width + 30, text.GetPreferredSize(new Size(widthOfElements, 0)).Height + 40);
+                element.BorderStyle = BorderStyle.FixedSingle;
+
+                if (elements[num].author == User.name)
+                {
+                    element.Location = new Point(xPositionAuthor1(element.Size.Width), yPosition);
+                }
+                else
+                {
+                    element.Location = new Point(xPositionAuthor2(element.Size.Width), yPosition);
+                }
+
+                Label author = new Label();
+                author.Text = elements[num].author;
+                widthOfElementIncide = element.Size.Width;
+                heightOfElementIncide = 20;
+                author.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                author.Location = new Point(0, yPositionIncide);
+                author.TextAlign = ContentAlignment.MiddleCenter;
+                author.BackColor = SystemColors.ControlLight;
+
+                yPositionIncide += heightOfElementIncide;
+
+                widthOfElementIncide = element.Size.Width;
+                heightOfElementIncide = element.Size.Height - 20;
+                text.Size = new Size(widthOfElementIncide, heightOfElementIncide);
+                text.Location = new Point(0, yPositionIncide);
+                text.TextAlign = ContentAlignment.TopLeft;
+                Console.WriteLine("preffered size : " + text.GetPreferredSize(text.Size));
+
+                element.Controls.Add(text);
+                element.Controls.Add(author);
+
+                yPosition += element.Size.Height + yMargin;
+                mainBox.Controls.Add(element);
+
+            }
+
+            Label nameOfConversation = new Label();
+            nameOfConversation.Text = conversation.name;
+            nameOfConversation.Size = new Size(180, 20);
+            nameOfConversation.BackColor = SystemColors.ControlLight;
+            nameOfConversation.TextAlign = ContentAlignment.MiddleCenter;
+            nameOfConversation.Font = new Font("Microsoft San Serif", 10);
+            nameOfConversation.Location = new Point(connectForm.a_main_screen_main_box.Size.Width / 2 - nameOfConversation.Size.Width / 2, 0);
+            nameOfConversation.Tag = conversation.id;
+            nameOfConversation.Cursor = Cursors.Hand;
+            nameOfConversation.Click += connectForm.conversation_options_open;
+            connectForm.a_main_screen_main_box.Controls.Add(nameOfConversation);
+
+            return yPosition;
         }
     }
 

@@ -29,6 +29,7 @@ namespace workflow
             timer.Start();
 
             Server.getUser();
+            Server.updateUsersConversations();
 
             User.set_name("Иванов И. И.", this);
 
@@ -192,6 +193,7 @@ namespace workflow
             a_main_screen_main_box_add_news_panel_news_content_text_box.Text = "";
             a_main_screen_main_box_add_news_panel_news_label_text_box.Text = "";
             a_main_screen_main_box_add_news_panel.Visible = true;
+            a_dark_background.Visible = true;
         }
 
         private void a_publish_news(object sender, EventArgs e)
@@ -219,6 +221,7 @@ namespace workflow
         private void a_exit_add_news_panel(object sender, EventArgs e)
         {
             a_main_screen_main_box_add_news_panel.Visible = false;
+            a_dark_background.Visible = false;
         }
 
         public void a_deleteNews_button_click(object sender, EventArgs e)
@@ -232,11 +235,13 @@ namespace workflow
         private void a_change_main_news_button_click(object sender, EventArgs e)
         {
             a_main_screen_main_box_change_news_panel.Visible = true;
+            a_dark_background.Visible = true;
             a_main_screen_main_box_change_news_panel_news_content_text_box.Text = a_main_screen_main_info_panel_text.Text;
         }
 
         private void a_exit_change_news_panel(object sender, EventArgs e)
         {
+            a_dark_background.Visible = false;
             a_main_screen_main_box_change_news_panel.Visible = false;
         }
 
@@ -267,6 +272,7 @@ namespace workflow
         private void a_exit_add_file_panel(object sender, EventArgs e)
         {
             a_main_screen_main_box_add_file_panel.Visible = false;
+            a_dark_background.Visible = false;
         }
 
         private void a_image_changed_by_user(object sender, MouseEventArgs e)
@@ -323,11 +329,13 @@ namespace workflow
             a_main_screen_main_box_add_template_panel_file_name_label.Text = "";
 
             a_main_screen_main_box_add_template_panel.Visible = true;
+            a_dark_background.Visible = true;
         }
 
         private void a_exit_add_template_panel(object sender, EventArgs e)
         {
             a_main_screen_main_box_add_template_panel.Visible = false;
+            a_dark_background.Visible = false;
         }
 
         private void a_select_template_set(object sender, CancelEventArgs e)
@@ -370,6 +378,67 @@ namespace workflow
 
             Server.deleteTemplate(template);
 
+        }
+
+        public void a_chats_left_panel_button_click(object sender, EventArgs e)
+        {
+            Label senderLabel = sender as Label;
+            string senderButton = senderLabel.Tag.ToString();
+
+            screenConstructor.setChatsMainScreenVersion(senderButton, this);
+        }
+
+        private void chats_mode_send_button_click(object sender, EventArgs e)
+        {
+            string text = a_main_screen_main_box_chats_mode_interface_panel_text_box.Text;
+            a_main_screen_main_box_chats_mode_interface_panel_text_box.Text = "";
+            Server.sendMessage(text);
+        }
+
+        public void conversation_options_open(object sender, EventArgs e)
+        {
+            Label senderLabel = sender as Label;
+            a_conversation_options_panel.Visible = true;
+            a_conversation_options_panel.BringToFront();
+            a_conversation_options_panel_name_text_box.Text = senderLabel.Text;
+
+            a_conversation_options_panel_add_users_list_box.Items.Clear();
+
+            foreach (string name in Server.getAllUsers())
+            {
+                a_conversation_options_panel_add_users_list_box.Items.Add(name);
+            }
+
+            Console.WriteLine("Conversation options");
+        }
+
+        private void a_conversation_options_panel_exit(object sender, EventArgs e)
+        {
+            a_conversation_options_panel.Visible = false;
+        }
+
+        private void a_conversation_options_panel_save_new_options(object sender, EventArgs e)
+        {
+            string newName = a_conversation_options_panel_name_text_box.Text;
+            Server.updateConversationName(newName, User.currentConversationId);
+
+            foreach (var item in a_conversation_options_panel_add_users_list_box.SelectedItems)
+            {
+                Server.addUserToConversation(item.ToString(), User.currentConversationId);
+            }
+
+            a_conversation_options_panel.Visible = false;
+        }
+
+        private void a_conversation_options_panel_leave_conversation(object sender, EventArgs e)
+        {
+            Server.leaveConversation(User.currentConversationId);
+            a_conversation_options_panel.Visible = false;
+        }
+
+        public void a_chats_left_panel_add_chat_button_click(object sender, EventArgs e)
+        {
+            Server.addNewChat();
         }
     }
 }

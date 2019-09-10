@@ -7,41 +7,65 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+
 
 namespace workflow
 {
 
     public partial class main_form : Form
     {
+
+        static public UserClass User = new UserClass();
+
         public main_form()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public void formSetter()
         {
-            User.systemData = new Dictionary<string, Label>();
-
-            this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
-            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-            timer.Interval = (1 * 1000); // 10 secs
-            timer.Tick += new EventHandler(timer_Tick);
-            timer.Start();
-
-            Server.getUser();
-            Server.updateUsersConversations();
-
-            User.set_name("Иванов И. И.", this);
+            using (FileStream fstream = File.OpenRead(System.IO.Path.Combine(Environment.CurrentDirectory, "safe.txt")))
+            {
+                // преобразуем строку в байты
+                byte[] array = new byte[fstream.Length];
+                // считываем данные
+                fstream.Read(array, 0, array.Length);
+                // декодируем байты в строку
+                string textFromFile = System.Text.Encoding.Default.GetString(array);
+                Console.WriteLine("Текст из файла: {0}", textFromFile);
+                string[] userInfo = textFromFile.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                Server.getUser(userInfo[0], userInfo[1]);
+                main_form.User.set_name(main_form.User.name, this);
+            }
 
             screenConstructor.setBox(a_main_screen_box, this);
+
+            Server.updateUsersConversations();
+            a_main_screen_main_info_panel_text.Text = Server.getMainNews();
 
             if (User.getPrivilege("changeMainNews"))
             {
                 a_main_screen_main_info_panel_change_button.Visible = true;
             }
+        }
 
-            a_main_screen_main_info_panel_text.Text = Server.getMainNews();
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if(File.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "safe.txt")))
+            {
+                formSetter();
 
+                this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
+                System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+                timer.Interval = (1 * 1000); // 10 secs
+                timer.Tick += new EventHandler(timer_Tick);
+                timer.Start();
+            }
+            else
+            {
+                screenConstructor.setBox(a_sign_in_box, this);
+            }
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -59,10 +83,21 @@ namespace workflow
                 this.a_sign_in_forgot_password_button.Visible = false; //Убираем кнопку 'забыли пароль'
                 this.a_sign_in_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign in > " + "password : " + password + " login : " + login);
+
+                formSetter();
+
+                this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
+                System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+                timer.Interval = (1 * 1000); // 10 secs
+                timer.Tick += new EventHandler(timer_Tick);
+                timer.Start();
+
                 screenConstructor.changeBoxes(this.a_sign_in_box, this.a_main_screen_box, this);
             }
             else
             {
+                this.a_sign_in_info_box.ForeColor = Color.Red;
+
                 this.a_sign_in_info_box.Text = Server.check_user_enter(login, password).Item2;
                 this.a_sign_in_forgot_password_button.Visible = true;
             }
@@ -97,10 +132,13 @@ namespace workflow
             {
                 this.a_sign_up_info_box.Text = ""; //Убираем окно ошибки
                 Console.WriteLine("sign up > " + "password : " + password + " login : " + login);
-                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_main_screen_box, this);
+                screenConstructor.changeBoxes(this.a_sign_up_box, this.a_sign_in_box, this);
+                a_sign_in_info_box.ForeColor = Color.Green;
+                a_sign_in_info_box.Text = "Вы успешно зарегистрированы. Войдите в систему с новыми данными";
             }
             else
             {
+                a_sign_up_info_box.ForeColor = Color.Red;
                 this.a_sign_up_info_box.Text = Server.new_user(login, password).Item2;
             }
         }

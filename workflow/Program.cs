@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace workflow
 {
@@ -67,54 +69,67 @@ namespace workflow
         public static void addNewChat()
         {
             Console.WriteLine("Add new chat");
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("userName", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("addNewChat", qParams);
         }
 
         public static void addUserToConversation(string user, string conversationId)
         {
             Console.WriteLine("Add user " + user + " to conversation with id " + conversationId);
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", conversationId);
+            qParams.Add("userName", user);
+            RequestM answer = SocketConnection.sendMessageFromSocket("addUserToConversation", qParams);
         }
 
         public static void updateConversationName(string newName, string conversationId)
         {
             Console.WriteLine("Change name to " + newName + " in conversation with id " + conversationId);
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", conversationId);
+            qParams.Add("newName", newName);
+            RequestM answer = SocketConnection.sendMessageFromSocket("updateConversationName", qParams);
         }
 
         public static void leaveConversation(string conversationId)
         {
-            Console.WriteLine("Leave conversation for " + User.name + " in conversation with id " + conversationId);
+            Console.WriteLine("Leave conversation for " + main_form.User.name + " in conversation with id " + conversationId);
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", conversationId);
+            qParams.Add("sender", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("leaveConversation", qParams);
         }
 
         public static void sendMessage(string text)
         {
-            Console.WriteLine("Send '" + text + "' to conversation with id " + User.currentConversationId);
+            Console.WriteLine("Send '" + text + "' to conversation with id " + main_form.User.currentConversationId);
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("text", text);
+            qParams.Add("author", main_form.User.name);
+            qParams.Add("id", main_form.User.currentConversationId);
+            RequestM answer = SocketConnection.sendMessageFromSocket("sendMessage", qParams);
         }
 
         public static void updateUsersConversations()
         {
-            List<Message> messages = new List<Message>();
-            List<Conversation> conversations = new List<Conversation>();
-  
-            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 0));
-            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 1));
-            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 2));
-            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 3));
-            messages.Add(new Message("Иванова И.И", "Привет, тестируем сообщения тут", 4));
-            messages.Add(new Message("Сергеев И.И", "Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут Привет, тестируем сообщения тут", 5));
-            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 6));
-            messages.Add(new Message("Ижик И.И", "Привет, тестируем сообщения тут", 7));
-            messages.Add(new Message("Иванов И.И", "Привет, тестируем сообщения тут", 8));
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("sender", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("updateUsersConversations", qParams);
 
-            for(int i = 0; i < 10; i ++)
-            {
-                conversations.Add(new Conversation("Беседа " + i.ToString(), messages, i));
-            }
-
-            User.conversations = conversations;
+            main_form.User.conversations = JsonConvert.DeserializeObject<List<Conversation>>(answer.parameters["conversations"].ToString());
         }
 
         public static List<string> getAllUsers()
         {
-            return new List<string>() { "Иванов И.И.", "Андропов И.К.", "Зарубин М.Ф.", "Добролюбов М.З.", "Панин М.И.", "Алексеев С.С." };
+            RequestM answer = SocketConnection.sendMessageFromSocket("getAllUsers", new Dictionary<string, object>());
+
+            return JsonConvert.DeserializeObject<List<string>>(answer.parameters["users"].ToString());
         }
 
         public static void downloadDocument(string document)
@@ -134,120 +149,150 @@ namespace workflow
 
         public static void addTemplate(string name, string path)
         {
+            string author = main_form.User.name;
+            string templateName = name;
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("author", author);
+            qParams.Add("name", name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("addTemplate", qParams);
+
+            byte[] data = File.ReadAllBytes(path);
+            string file = Convert.ToBase64String(data);
+
+            qParams.Add("file", file);
+
             Console.WriteLine("Add template " + name + " (" + path + ")");
         }
 
-        public static void getUser()
+        public static void getUser(string login, string password)
         {
-            User.shedule = new List<string>() { "Русский", "Математика", "Информатика", "Русский", "Математика", "Информатика", "Русский" };
-            User.name = "Иванов И.И";
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("login", login);
+            qParams.Add("password", password);
+            RequestM answer = SocketConnection.sendMessageFromSocket("getUser", qParams);
+
+            main_form.User = new UserClass();
+
+            main_form.User.name = answer.parameters["name"] as string;
+            main_form.User.privileges = JsonConvert.DeserializeObject<Dictionary<string, bool>>(answer.parameters["privileges"] as string);
+            main_form.User.shedule = JsonConvert.DeserializeObject<List<string>>(answer.parameters["shedule"] as string);
+            main_form.User.systemData = new Dictionary<string, Label>();
         }
 
         public static void addNews(string labelOfNews, string contentOfNews)
         {
-            Console.WriteLine("Add news : " + labelOfNews + " : " + contentOfNews);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("content", contentOfNews);
+            qParams.Add("label", labelOfNews);
+            qParams.Add("author", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("addNews", qParams);
         }
 
         public static void changeMainNews(string contentOfNews)
         {
-            Console.WriteLine("Change news : " + contentOfNews);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("content", contentOfNews);
+            RequestM answer = SocketConnection.sendMessageFromSocket("changeMainNews", qParams);
         }
 
         public static void deleteNews(string newsId)
         {
-
-            Console.WriteLine("Delete news : " + newsId);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", newsId);
+            RequestM answer = SocketConnection.sendMessageFromSocket("deleteNews", qParams);
         }
 
         public static void deleteTemplate(string templateId)
         {
-            Console.WriteLine("Delete template : " + templateId);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", templateId);
+            RequestM answer = SocketConnection.sendMessageFromSocket("deleteTemplate", qParams);
         }
 
         public static List<News> getNews()
         {
+            RequestM answer = SocketConnection.sendMessageFromSocket("getNews", new Dictionary<string, object>());
 
-            List<News> contentMain = new List<News>();
-
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 1));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 2));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 3));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 4));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 5));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 6));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 7));
-            contentMain.Add(new News("Фролов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 8));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 9));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 10));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 11));
-            contentMain.Add(new News("Иванова И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 12));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 13));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 14));
-            contentMain.Add(new News("Антонов К.А", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 15));
-            contentMain.Add(new News("Иванов И.И", "Кому на руси жить хорошо", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation", DateTime.Now.ToString(), 16));
-
-            return contentMain;
+            return JsonConvert.DeserializeObject<List<News>>(answer.parameters["news"].ToString());
         }
 
         public static List<Documents> getDocuments()
         {
-            List<Documents> contentMain = new List<Documents>();
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("sender", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("getDocuments", qParams);
 
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 1));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 2));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 3));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 4));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 5));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 6));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 7));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 8));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 9));
-            contentMain.Add(new Documents("Новое", "Иванов И.И", "Справка о посещаемости", 10));
-
-            return contentMain;
+            return JsonConvert.DeserializeObject<List<Documents>>(answer.parameters["documents"].ToString());
         }
 
         public static List<Templates> getTemplates()
         {
-            List<Templates> contentMain = new List<Templates>();
+            RequestM answer = SocketConnection.sendMessageFromSocket("getTemplates", new Dictionary<string, object>());
 
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 1));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 2));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 3));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 4));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 5));
-            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 6));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 7));
-            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 8));
-            contentMain.Add(new Templates("Петров И.И", "Шаблон заполнения ИРЗ", 9));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 10));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 11));
-            contentMain.Add(new Templates("Иванов И.И", "Шаблон заполнения ИРЗ", 12));
-
-            return contentMain;
+            return JsonConvert.DeserializeObject<List<Templates>>(answer.parameters["templates"].ToString());
         }
 
         public static string getMainNews()
         {
-            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            RequestM answer = SocketConnection.sendMessageFromSocket("getMainNews", new Dictionary<string, object>());
+
+            if(answer.name == "Ok")
+            {
+                return answer.parameters["main_news"] as string;
+            }
+            else
+            {
+                return "Ошибка на стороне сервера";
+            }
         }
 
         public static Tuple<bool, string> check_user_enter(string login, string password)
         {
-            if (!(login == "root" && password == "root"))
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("login", login);
+            qParams.Add("password", password);
+            RequestM answer = SocketConnection.sendMessageFromSocket("check_user_enter", qParams);
+
+            if (answer.name == "Denied")
             {
                 return new Tuple<bool, string>(false, "Нет пользователя c такими login и password");
             }
-            return new Tuple<bool, string>(true, "accept");
+            if(answer.name == "Accepted")
+            {
+                using (FileStream fstream = new FileStream(System.IO.Path.Combine(Environment.CurrentDirectory, "safe.txt"), FileMode.OpenOrCreate))
+                {
+                    string text = login.ToString() + ";" + password.ToString(); 
+
+                    // преобразуем строку в байты
+                    byte[] array = System.Text.Encoding.Default.GetBytes(text);
+                    // запись массива байтов в файл
+                    fstream.Write(array, 0, array.Length);
+                    Console.WriteLine("Логин и пароль записаны в файл");
+                }
+
+                return new Tuple<bool, string>(true, "accept");
+            }
+            return new Tuple<bool, string>(false, "Ошибка на стороне сервера");
         }
 
         public static Tuple<bool, string> new_user(string login, string password)
         {
-            if (login == "root")
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("login", login);
+            qParams.Add("password", password);
+            RequestM answer = SocketConnection.sendMessageFromSocket("new_user", qParams);
+
+            if (answer.name == "Denied")
             {
                 return new Tuple<bool, string>(false, "Пользователь с таким login уже существует");
             }
-            return new Tuple<bool, string>(true, "accept");
+            if(answer.name == "Ok")
+            {
+                return new Tuple<bool, string>(true, "accept");
+            }
+            return new Tuple<bool, string>(false, "Ошибка на стороне сервера");
         }
 
         public static Tuple<bool, string> refresh_password(string login)
@@ -265,13 +310,11 @@ namespace workflow
     {
         public string author;
         public string text;
-        public int id;
 
-        public Message(string _author, string _text, int _id)
+        public Message(string _author, string _text)
         {
             this.author = _author;
             this.text = _text;
-            this.id = _id;
         }
     }
 
@@ -290,16 +333,16 @@ namespace workflow
         }
     }
 
-    public class User
+    public class UserClass
     {
-        static public Dictionary<string, Label> systemData; //Хранятся указатели на DocumentsLeftPanelButtons
+        public Dictionary<string, Label> systemData; //Хранятся указатели на DocumentsLeftPanelButtons
+        public List<Conversation> conversations;
+        public List<string> shedule;
+        public string name;
+        public string currentConversationId;
+        public Dictionary<string, bool> privileges;
 
-        static public List<Conversation> conversations;
-        static public List<string> shedule;
-        static public string name;
-        static public string currentConversationId;
-
-        static public void set_photo(string photo_src, workflow.main_form connectForm)
+        public void set_photo(string photo_src, workflow.main_form connectForm)
         {
             int width = (int)connectForm.a_main_screen_left_panel_picture_box.Size.Width;
             var height = (int)connectForm.a_main_screen_left_panel_picture_box.Size.Height;
@@ -308,16 +351,42 @@ namespace workflow
             //Server.update_user_photo();
         }
 
-        static public void set_name(string name, workflow.main_form connectForm)
+        public void set_name(string name, workflow.main_form connectForm)
         {
             connectForm.a_main_screen_left_panel_name.Text = name;
         }
 
-        static public bool getPrivilege(string privilegeName)
+        public bool getPrivilege(string privilegeName)
         {
-            return true;
+            Console.Write("Get privilege " + privilegeName);
+
+            return main_form.User.privileges[privilegeName];
         }
 
+        public UserClass(string _name, Dictionary<string, bool> _privileges, List<string> _shedule)
+        {
+            name = _name;
+            privileges = _privileges;
+            shedule = _shedule;
+        }
+
+        public UserClass()
+        {
+
+        }
+
+    }
+
+    public class UserClassClipped
+    {
+        public List<string> shedule;
+        public string name;
+        public Dictionary<string, bool> privileges;
+
+        public UserClassClipped()
+        {
+
+        }
     }
 
     public class screenConstructor
@@ -335,7 +404,17 @@ namespace workflow
 
                     List<Documents> labelDocuments = new List<Documents>() { new Documents("Cтатус", "Автор", "Тема", 0) };
                     List<Documents> contentDocuments = Server.getDocuments();
-                    List<Documents> filledDocuments = labelDocuments.Concat(contentDocuments).ToList();
+
+                    List<Documents> filledDocuments = new List<Documents>();
+
+                    if (!(contentDocuments is null) && contentDocuments.Count() > 0)
+                    {
+                        filledDocuments = labelDocuments.Concat(contentDocuments).ToList();
+                    }
+                    else
+                    {
+                        filledDocuments = labelDocuments;
+                    }
 
                     Dictionary<int, Color> propertiesDocuments = new Dictionary<int, Color>(filledDocuments.Count());
 
@@ -364,14 +443,24 @@ namespace workflow
 
                 case "a_document_templates_button":
 
-                    if (User.getPrivilege("addTemplates"))
+                    if (main_form.User.getPrivilege("addTemplates"))
                     {
                         connectForm.a_main_screen_main_box_add_template_button.Visible = true;
                     }
 
                     List<Templates> labelTemplates = new List<Templates>() { new Templates("Автор", "Название", 0) };
                     List<Templates> contentTemplates = Server.getTemplates();
-                    List<Templates> filledTemplates = labelTemplates.Concat(contentTemplates).ToList();
+
+                    List<Templates> filledTemplates = new List<Templates>();
+
+                    if (!(contentTemplates is null) && contentTemplates.Count() > 0)
+                    {
+                        filledTemplates = labelTemplates.Concat(contentTemplates).ToList();
+                    }
+                    else
+                    {
+                        filledTemplates = labelTemplates;
+                    }
 
                     Dictionary<int, Color> propertiesTemplates = new Dictionary<int, Color>(filledTemplates.Count());
 
@@ -387,7 +476,7 @@ namespace workflow
         {
 
 
-            User.currentConversationId = senderButton;
+            main_form.User.currentConversationId = senderButton;
             Console.WriteLine("ID : " + senderButton);
 
             cleanMainScreenEnvironment(connectForm, false);
@@ -401,9 +490,9 @@ namespace workflow
 
             Conversation currentConversation = null;
 
-            foreach (Conversation conversation in User.conversations)
+            foreach (Conversation conversation in main_form.User.conversations)
             {
-                if(conversation.id.ToString() == User.currentConversationId)
+                if(conversation.id.ToString() == main_form.User.currentConversationId)
                 {
                     currentConversation = conversation;
                     break;
@@ -488,21 +577,21 @@ namespace workflow
 
         public static void resetDocumentsLeftPanelButtonsColors(string labelToSetActive, workflow.main_form connectForm)
         {
-            User.systemData["a_send_message_button"].ForeColor = System.Drawing.Color.Black;
-            User.systemData["a_incoming_messages_button"].ForeColor = System.Drawing.Color.Black;
-            User.systemData["a_document_templates_button"].ForeColor = System.Drawing.Color.Black;
+            main_form.User.systemData["a_send_message_button"].ForeColor = System.Drawing.Color.Black;
+            main_form.User.systemData["a_incoming_messages_button"].ForeColor = System.Drawing.Color.Black;
+            main_form.User.systemData["a_document_templates_button"].ForeColor = System.Drawing.Color.Black;
 
-            User.systemData[labelToSetActive].ForeColor = System.Drawing.Color.Red;
+            main_form.User.systemData[labelToSetActive].ForeColor = System.Drawing.Color.Red;
         }
 
         public static void resetChatsLeftPanelButtonsColors(workflow.main_form connectForm)
         {
-            foreach(Conversation conversation in User.conversations)
+            foreach(Conversation conversation in main_form.User.conversations)
             {
-                User.systemData[conversation.id.ToString()].ForeColor = System.Drawing.Color.Black;
+                main_form.User.systemData[conversation.id.ToString()].ForeColor = System.Drawing.Color.Black;
             }
 
-            User.systemData[User.currentConversationId].ForeColor = System.Drawing.Color.Red;
+            main_form.User.systemData[main_form.User.currentConversationId].ForeColor = System.Drawing.Color.Red;
         }
 
         public static void cleanMainScreenEnvironment(workflow.main_form connectForm, bool clearLeft = true)
@@ -563,8 +652,18 @@ namespace workflow
                     //--------------------------- left screen changes
 
                     List<string> labelLeftMain = new List<string>() { "Расписание: " };
-                    List<string> contentLeftMain = User.shedule;
-                    List<string> filledLeftMain = labelLeftMain.Concat(contentLeftMain).ToList();
+                    List<string> contentLeftMain = main_form.User.shedule;
+
+                    List<string> filledLeftMain = new List<string>();
+
+                    if (!(contentLeftMain is null) && contentLeftMain.Count() > 0)
+                    {
+                        filledLeftMain = labelLeftMain.Concat(contentLeftMain).ToList();
+                    }
+                    else
+                    {
+                        filledLeftMain = labelLeftMain;
+                    }
 
                     Dictionary<int, ContentAlignment> propertiesLeftMain = new Dictionary<int, ContentAlignment>(filledLeftMain.Count());
 
@@ -572,7 +671,7 @@ namespace workflow
 
                     customBox.addElements(filledLeftMain, propertiesLeftMain, connectForm.a_main_screen_left_panel_custom_box, connectForm, environment);
 
-                    if (User.getPrivilege("addNews"))
+                    if (main_form.User.getPrivilege("addNews"))
                     {
                         connectForm.a_main_screen_main_box_add_news_button.Visible = true;
                     }
@@ -581,9 +680,19 @@ namespace workflow
 
                     List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации", 0) };
                     List<News> contentMain = Server.getNews();
-                    List<News> filledMain = labelMain.Concat(contentMain).ToList();
 
-                    Dictionary<int, Color> propertiesMain = new Dictionary<int, Color>(filledLeftMain.Count());
+                    List<News> filledMain = new List<News>();
+
+                    if (!(contentMain is null) && contentMain.Count() > 0)
+                    {
+                        filledMain = labelMain.Concat(contentMain).ToList();
+                    }
+                    else
+                    {
+                        filledMain = labelMain;
+                    }
+
+                    Dictionary<int, Color> propertiesMain = new Dictionary<int, Color>(filledMain.Count());
 
                     propertiesMain.Add(0, SystemColors.ControlLight);
 
@@ -594,7 +703,7 @@ namespace workflow
 
                 case "documents":
 
-                    User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
+                    main_form.User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
 
                     resetTopPanelButtonsColors(connectForm.a_main_screen_top_panel_button2_text, connectForm);
 
@@ -620,7 +729,7 @@ namespace workflow
 
                 case "chats":
 
-                    User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
+                    main_form.User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
 
                     resetTopPanelButtonsColors(connectForm.a_main_screen_top_panel_button3_text, connectForm);
 
@@ -631,13 +740,25 @@ namespace workflow
                     List<string> labelLeftChatsAfter = new List<string>() { "+ Добавить беседу" };
                     List<string> filledLeftChatsNames = new List<string>();
 
-                    foreach (var item in User.conversations){
+                    Server.updateUsersConversations();
+
+                    foreach (var item in main_form.User.conversations){
                         conversationNames.Add(item.name);
                         filledLeftChatsNames.Add(item.id.ToString());
                     }
 
                     List<string> contentLeftChats = conversationNames;
-                    List<string> filledLeftChats = labelLeftChats.Concat(contentLeftChats).Concat(labelLeftChatsAfter).ToList();
+
+                    List<string> filledLeftChats = new List<string>();
+
+                    if (!(contentLeftChats is null) && contentLeftChats.Count() > 0)
+                    {
+                        filledLeftChats = labelLeftChats.Concat(contentLeftChats).Concat(labelLeftChatsAfter).ToList();
+                    }
+                    else
+                    {
+                        filledLeftChats = labelLeftChats.Concat(labelLeftChatsAfter).ToList();
+                    }
 
                     Dictionary<int, ContentAlignment> propertiesLeftChats = new Dictionary<int, ContentAlignment>(filledLeftChats.Count());
 
@@ -651,7 +772,10 @@ namespace workflow
                     connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = true;
                     connectForm.a_main_screen_main_box_chats_mode_main_panel.Visible = true;
 
-                    screenConstructor.setChatsMainScreenVersion(User.conversations[0].id.ToString(), connectForm);
+                    if(main_form.User.conversations.Count() > 0)
+                    {
+                        screenConstructor.setChatsMainScreenVersion(main_form.User.conversations[0].id.ToString(), connectForm);
+                    }
 
                     Console.WriteLine("Change environment : chats");
                     break;
@@ -675,7 +799,7 @@ namespace workflow
 
             int notServiceElementsCount = 0;
 
-            if(environment == "chats")
+            if(environment == "chats" && elements.Count() * 40 > height)
             {
                 heightOfElements = 40; //fixed size у названий чатов
                 widthOfElements = widthOfElements - 17; //Полоса прокрутки сьедает 17px
@@ -708,12 +832,12 @@ namespace workflow
                     labelOnElement.Tag = customNames[num];
                     labelOnElement.Cursor = Cursors.Hand;
                     labelOnElement.Click += new EventHandler(connectForm.a_documents_left_panel_button_click);
-                    User.systemData.Add(customNames[num], labelOnElement);
+                    main_form.User.systemData.Add(customNames[num], labelOnElement);
                 }
 
                 if(environment == "chats" && !properties.ContainsKey(num))//Если есть в properties - то он служебный
                 {
-                    User.systemData.Add(customNames[notServiceElementsCount], labelOnElement);
+                    main_form.User.systemData.Add(customNames[notServiceElementsCount], labelOnElement);
                     labelOnElement.Tag = customNames[notServiceElementsCount]; //Скипаем служебные элементы, поэтому собственный счетчик
                     notServiceElementsCount++;
                     labelOnElement.Cursor = Cursors.Hand;
@@ -824,7 +948,7 @@ namespace workflow
                 Panel buttonBox = new Panel();
                 Button deleteNews = new Button();
 
-                if (User.name == elements[num].author)
+                if (main_form.User.name == elements[num].author)
                 {
                     //Добавляем content
 
@@ -1048,7 +1172,7 @@ namespace workflow
                 Button downloadTemplate = new Button();
                 Button deleteTemplate = new Button();
 
-                if (User.name == elements[num].author)
+                if (main_form.User.name == elements[num].author)
                 {
 
                     //Добавляем панель для кнопки загрузки
@@ -1181,7 +1305,7 @@ namespace workflow
                 element.Size = new Size(text.GetPreferredSize(new Size(widthOfElements, 0)).Width + 30, text.GetPreferredSize(new Size(widthOfElements, 0)).Height + 40);
                 element.BorderStyle = BorderStyle.FixedSingle;
 
-                if (elements[num].author == User.name)
+                if (elements[num].author == main_form.User.name)
                 {
                     element.Location = new Point(xPositionAuthor1(element.Size.Width), yPosition);
                 }

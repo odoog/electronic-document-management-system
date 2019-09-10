@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using Newtonsoft.Json;
+using System.IO;
+using System.Diagnostics;
+using System.Xml.Serialization;
+
+namespace workflow
+{
+    class SocketConnection
+    {
+        public static int port = 11000;
+
+        static public RequestM sendMessageFromSocket(string name, Dictionary<string, object> qParams)
+        {
+            // Буфер для входящих данных
+            byte[] bytes = new byte[1024];
+
+            // Соединяемся с удаленным устройством
+
+            // Устанавливаем удаленную точку для сокета
+            IPHostEntry ipHost = Dns.GetHostEntry("localhost");
+            IPAddress ipAddr = ipHost.AddressList[0];
+            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, port);
+
+            Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+            // Соединяем сокет с удаленной точкой
+            sender.Connect(ipEndPoint);
+
+            string message = JsonConvert.SerializeObject(new RequestM(name, qParams));
+
+            Console.WriteLine("Сокет соединяется с {0} ", sender.RemoteEndPoint.ToString());
+            byte[] msg = Encoding.UTF8.GetBytes(message);
+
+            // Отправляем данные через сокет
+            int bytesSent = sender.Send(msg);
+
+            // Получаем ответ от сервера
+            int bytesRec = sender.Receive(bytes);
+
+            string answer = Encoding.UTF8.GetString(bytes, 0, bytesRec);
+
+            RequestM answerSep = JsonConvert.DeserializeObject<RequestM>(answer);
+
+            // Освобождаем сокет
+            sender.Shutdown(SocketShutdown.Both);
+            sender.Close();
+
+            return answerSep;
+        }
+    }
+
+    class RequestM
+    {
+        public string name;
+        public Dictionary<string, object> parameters;
+
+        public RequestM(string _name, Dictionary<string, object> _parametrs)
+        {
+            name = _name;
+            parameters = _parametrs;
+        }
+    }
+}

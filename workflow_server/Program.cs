@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace SocketServer
 {
@@ -58,28 +59,32 @@ namespace SocketServer
                     string data = null;
 
                     // Мы дождались клиента, пытающегося с нами соединиться
-
+                    string block = null;
+                    
                     byte[] bytes = new byte[1024];
-                    int bytesRec = handler.Receive(bytes);
 
-                    data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
+                    int bytesRec = 0;
+
+                    while (true){
+
+                        bytesRec = handler.Receive(bytes);
+                        block = Encoding.UTF8.GetString(bytes, 0, bytesRec);
+                        data += block;
+                        if (data.Contains("<TheEnd>")) break;
+                    }
+
+                    data = data.Remove(data.Length - 8);
 
                     // Показываем данные на консоли
                     Console.Write("Полученный текст: " + data + "\n\n");
 
                     // Отправляем ответ клиенту
-                    string reply = connectionHandel.getAnswer(data);
+                    string reply = connectionHandel.getAnswer(data) + "<TheEnd>";
                     byte[] msg = Encoding.UTF8.GetBytes(reply);
 
-                    int bytesSent = 0;
-                    int bytesLeft = package.Length;
-                    while (bytesLeft > 0)
-                    {
-                        int nextPacketSize = (bytesLeft > 1024) ? 1024 : bytesLeft;
-                        handler.Send(msg);
-                        bytesSent += nextPacketSize;
-                        bytesLeft -= nextPacketSize;
-                    }
+
+
+                    handler.Send(msg);
 
                     if (data.IndexOf("<TheEnd>") > -1)
                     {
@@ -111,19 +116,28 @@ namespace SocketServer
 
         public static MySqlDataReader q(string sql)
         {
-            Console.WriteLine("DBQUEST: " + sql);
+            try
+            {
 
-            if(!(lastReader is null)) lastReader.Close();
+                Console.WriteLine("DBQUEST: " + sql);
 
-            Console.WriteLine("Database request");
+                if (!(lastReader is null)) lastReader.Close();
 
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
+                Console.WriteLine("Database request");
 
-            MySqlDataReader reader = cmd.ExecuteReader();
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
 
-            lastReader = reader;
+                MySqlDataReader reader = cmd.ExecuteReader();
 
-            return reader;
+                lastReader = reader;
+
+                return reader;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MYSQL ERROR : " + e.Message);
+                return null;
+            }
         }
     }
 
@@ -139,12 +153,36 @@ namespace SocketServer
         }
     }
 
-
     class connectionHandel
     {
 
+        public static void updateUserUpdateStatus(string userName, bool status, bool forAll = false, List<string> userList = null)
+        {
+            int statusN = status ? 1 : 0;
+
+            if (!(userList is null))
+            {
+                foreach(string currentUser in userList)
+                {
+                    mysql.q($"UPDATE `users` SET `update`= {statusN} WHERE `name`='{currentUser}'");
+                }
+            }
+            else
+            {
+                if (forAll)
+                {
+                    mysql.q($"UPDATE `users` SET `update`= {statusN} WHERE 1");
+                }
+                else
+                {
+                    mysql.q($"UPDATE `users` SET `update`= {statusN} WHERE `name`= '{userName}'");
+                }
+            }
+        }
+
         public static string getAnswer(string request)
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); //System
 
             RequestM requestSepr = JsonConvert.DeserializeObject<RequestM>(request);
 
@@ -160,6 +198,11 @@ namespace SocketServer
             string name;
             string id;
             string userName;
+            string type;
+            string file;
+            byte[] fileInBytes;
+            string nameOfFileByIndex = "";
+            byte[] data;
 
             bool entryVar = false;
 
@@ -252,7 +295,7 @@ namespace SocketServer
 
                 case "getTemplates":
 
-                    reader = mysql.q($"SELECT * FROM `templates`");
+                    reader = mysql.q($"SELECT * FROM `templates` ORDER BY `id` DESC");
 
                     answer.name = "Ok";
 
@@ -279,7 +322,7 @@ namespace SocketServer
 
                     string sender = requestSepr.parameters["sender"] as string;
 
-                    reader = mysql.q($"SELECT * FROM `documents`");
+                    reader = mysql.q($"SELECT * FROM `documents` ORDER BY `id` DESC");
 
                     answer.name = "Ok";
 
@@ -289,10 +332,10 @@ namespace SocketServer
                     {
 
 
-                        List<string> recipients = JsonConvert.DeserializeObject<List<string>>(reader[3].ToString());
+                        Dictionary<string, bool> recipientsArray = JsonConvert.DeserializeObject<Dictionary<string, bool>>(reader[4].ToString());
 
 
-                        if (recipients.IndexOf(sender) == -1) //Если у документа пользователь не в рассылке - пропускаем
+                        if (!recipientsArray.ContainsKey(sender)) //Если у документа пользователь не в рассылке - пропускаем
                         {
                             continue;
                         }
@@ -302,6 +345,7 @@ namespace SocketServer
                         document.author = reader[0].ToString();
                         document.label = reader[1].ToString();
                         document.id = Int32.Parse(reader[2].ToString());
+                        document.status = recipientsArray[sender];
 
                         answerListGetDocuments.Add(document);
                     }
@@ -312,7 +356,7 @@ namespace SocketServer
 
                 case "getNews":
 
-                    reader = mysql.q($"SELECT * FROM `news`");
+                    reader = mysql.q($"SELECT * FROM `news` ORDER BY `time` DESC");
 
                     answer.name = "Ok";
 
@@ -337,6 +381,8 @@ namespace SocketServer
 
                 case "deleteTemplate":
 
+                    updateUserUpdateStatus("", true, true);
+
                     string templateId = requestSepr.parameters["id"] as string;
 
                     reader = mysql.q($"DELETE FROM `templates` WHERE `id`={templateId}");
@@ -346,6 +392,8 @@ namespace SocketServer
                     break;
 
                 case "deleteNews":
+
+                    updateUserUpdateStatus("", true, true);
 
                     string newsId = requestSepr.parameters["id"] as string;
 
@@ -357,6 +405,8 @@ namespace SocketServer
 
                 case "changeMainNews":
 
+                    updateUserUpdateStatus("", true, true);
+
                     content = requestSepr.parameters["content"] as string;
 
                     reader = mysql.q($"UPDATE `variables` SET `value`='{content}' WHERE `name`='main_news'");
@@ -366,6 +416,8 @@ namespace SocketServer
                     break;
 
                 case "addNews":
+
+                    updateUserUpdateStatus("", true, true);
 
                     content = requestSepr.parameters["content"] as string;
                     label = requestSepr.parameters["label"] as string;
@@ -465,6 +517,9 @@ namespace SocketServer
                     while (reader.Read())
                     {
                         List<Message> conversationMessages = JsonConvert.DeserializeObject<List<Message>>(reader[2].ToString());
+                        List<String> usersInConversation = JsonConvert.DeserializeObject<List<string>>(reader[3].ToString());
+
+                        updateUserUpdateStatus("", true, false, usersInConversation);
 
                         Message newMessage = new Message(author, text);
 
@@ -484,6 +539,8 @@ namespace SocketServer
 
                     id = requestSepr.parameters["id"] as string;
                     name = requestSepr.parameters["sender"] as string;
+
+                    updateUserUpdateStatus(name, true);
 
                     reader = mysql.q($"SELECT * FROM `conversations` WHERE `id`={id}");
 
@@ -509,6 +566,17 @@ namespace SocketServer
 
                     reader = mysql.q($"UPDATE conversations SET name='{newName}' WHERE id={id}");
 
+                    reader = mysql.q($"SELECT * FROM `conversations` WHERE `id`={id}");
+
+                    while (reader.Read())
+                    {
+                        List<string> conversationUsers = JsonConvert.DeserializeObject<List<string>>(reader[3].ToString());
+
+                        updateUserUpdateStatus("", true, false, conversationUsers);
+
+                        break;
+                    }
+
                     answer.name = "Ok";
 
                     break;
@@ -517,6 +585,8 @@ namespace SocketServer
 
                     id = requestSepr.parameters["id"] as string;
                     userName = requestSepr.parameters["userName"] as string;
+
+                    updateUserUpdateStatus(userName, true, false);
 
                     reader = mysql.q($"SELECT * FROM `conversations` WHERE `id`={id}");
 
@@ -539,6 +609,8 @@ namespace SocketServer
 
                     userName = requestSepr.parameters["userName"] as string;
 
+                    updateUserUpdateStatus(userName, true, false);
+
                     List<string> userInConversation = new List<string>();
                     userInConversation.Add(userName);
 
@@ -552,11 +624,166 @@ namespace SocketServer
 
                 case "addTemplate":
 
+                    updateUserUpdateStatus("", true, true);
+
                     name = requestSepr.parameters["name"] as string;
                     author = requestSepr.parameters["author"] as string;
+                    type = requestSepr.parameters["type"] as string;
 
-                    mysql.q($"INSERT INTO templates(name,author) VALUES ('{name}','{author}')");
+                    file = requestSepr.parameters["file"] as string;
+                    fileInBytes = Convert.FromBase64String(file);
 
+                    if (!System.IO.Directory.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "templates")))
+                    {
+                        Directory.CreateDirectory(System.IO.Path.Combine(Environment.CurrentDirectory, "templates"));
+                    }
+
+                    mysql.q($"INSERT INTO templates(name,author,type) VALUES ('{name}','{author}', '{type}')");
+                    reader = mysql.q($"SELECT * FROM `templates` WHERE `author` = '{author}' AND `name` = '{name}' AND `type` = '{type}'");
+
+                    while (reader.Read())
+                    {
+                        nameOfFileByIndex = reader[2].ToString();
+
+                        break;
+                    }
+
+                    Console.WriteLine(System.IO.Path.Combine(Environment.CurrentDirectory, "\\templates\\" + nameOfFileByIndex + type));
+
+                    File.WriteAllBytes(Environment.CurrentDirectory + "\\templates\\" + nameOfFileByIndex + type, fileInBytes);
+
+                    break;
+
+                case "sendFile":
+
+                    sender = requestSepr.parameters["sender"] as string;
+                    label = requestSepr.parameters["label"] as string;
+                    type = requestSepr.parameters["type"] as string;
+                    string recipients = requestSepr.parameters["recipients"] as string;
+
+                    file = requestSepr.parameters["file"] as string;
+                    fileInBytes = Convert.FromBase64String(file);
+
+                    if (!System.IO.Directory.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "files")))
+                    {
+                        Directory.CreateDirectory(System.IO.Path.Combine(Environment.CurrentDirectory, "files"));
+                    }
+
+                    mysql.q($"INSERT INTO documents(author,label,type,recipients) VALUES ('{sender}','{label}', '{type}', '{recipients}')");
+                    reader = mysql.q($"SELECT * FROM `documents` WHERE `author` = '{sender}' AND `label` = '{label}' AND `type` = '{type}' AND `recipients` = '{recipients}'");
+
+                    while (reader.Read())
+                    {
+                        nameOfFileByIndex = reader[2].ToString();
+
+                        break;
+                    }
+
+                    Console.WriteLine(Environment.CurrentDirectory);
+
+                    File.WriteAllBytes(Environment.CurrentDirectory + "\\files\\" + nameOfFileByIndex + type, fileInBytes);
+
+                    Dictionary<string, bool> recipientDeser = JsonConvert.DeserializeObject<Dictionary<string, bool>>(recipients);
+                    List<string> recipientList = new List<string>();
+
+                    foreach(string currentKey in recipientDeser.Keys)
+                    {
+                        recipientList.Add(currentKey);
+                    }
+
+                    updateUserUpdateStatus("", true, false, recipientList);
+
+                    break;
+
+                case "downloadDocument":
+
+                    id = requestSepr.parameters["id"] as string;
+                    name = requestSepr.parameters["name"] as string;
+
+                    updateUserUpdateStatus(name, true);
+
+                    reader = mysql.q($"SELECT * FROM `documents` WHERE `id`={id}");
+
+                    Dictionary<string, bool> userStatus = new Dictionary<string, bool>();
+
+                    type = "";
+                    label = "";
+
+                    while (reader.Read())
+                    {
+                        userStatus = JsonConvert.DeserializeObject<Dictionary<string, bool>>(reader[4].ToString());
+                        userStatus[name] = true;
+
+                        type = reader[3].ToString();
+                        label = reader[1].ToString();
+
+                        break;
+                    }
+
+                    reader = mysql.q($"UPDATE `documents` SET `recipients`='{JsonConvert.SerializeObject(userStatus)}' WHERE `id`={id}");
+
+                    data = File.ReadAllBytes(Environment.CurrentDirectory + "\\files\\" + id + type);
+                    file = Convert.ToBase64String(data);
+
+                    answer.name = "Ok";
+
+                    answer.parameters.Add("file", file);
+                    answer.parameters.Add("type", type);
+                    answer.parameters.Add("label", label);
+
+                    break;
+
+                case "downloadTemplate":
+
+                    id = requestSepr.parameters["id"] as string;
+
+                    reader = mysql.q($"SELECT * FROM `templates` WHERE `id`={id}");
+
+                    type = "";
+                    label = "";
+
+                    while (reader.Read())
+                    {
+                        type = reader[3].ToString();
+                        label = reader[1].ToString();
+
+                        break;
+                    }
+
+                    data = File.ReadAllBytes(Environment.CurrentDirectory + "\\templates\\" + id + type);
+                    file = Convert.ToBase64String(data);
+
+                    answer.name = "Ok";
+
+                    answer.parameters.Add("file", file);
+                    answer.parameters.Add("type", type);
+                    answer.parameters.Add("label", label);
+
+                    break;
+
+                case "getUpdateExistence":
+
+                    userName = requestSepr.parameters["name"] as string;
+
+                    reader = mysql.q($"SELECT * FROM `users` WHERE `name`='{userName}'");
+
+                    while (reader.Read())
+                    {
+                        if(reader[5].ToString() == "1")
+                        {
+                            answer.parameters.Add("updates", true);
+                        }
+                        else
+                        {
+                            answer.parameters.Add("updates", false);
+                        }
+
+                        break;
+                    }
+
+                    answer.name = "Ok";
+
+                    mysql.q($"UPDATE `users` SET `update`=0 WHERE `name`='{userName}'");
 
                     break;
 
@@ -565,9 +792,6 @@ namespace SocketServer
                     answer.name = "Error. Invalid type of question";
 
                     break;
-
-                
-
             }
 
             return JsonConvert.SerializeObject(answer);
@@ -644,13 +868,15 @@ namespace SocketServer
         public string author;
         public string label;
         public int id;
+        public bool status;
 
-        public Documents(string _read, string _author, string _label, int _id)
+        public Documents(string _read, string _author, string _label, int _id, bool _status)
         {
             this.read = _read;
             this.author = _author;
             this.label = _label;
             this.id = _id;
+            this.status = _status;
         }
 
         public Documents()

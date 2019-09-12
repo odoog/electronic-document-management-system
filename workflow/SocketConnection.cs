@@ -36,15 +36,31 @@ namespace workflow
             string message = JsonConvert.SerializeObject(new RequestM(name, qParams));
 
             Console.WriteLine("Сокет соединяется с {0} ", sender.RemoteEndPoint.ToString());
-            byte[] msg = Encoding.UTF8.GetBytes(message);
+            byte[] msg = Encoding.UTF8.GetBytes(message + "<TheEnd>");
 
             // Отправляем данные через сокет
             int bytesSent = sender.Send(msg);
 
             // Получаем ответ от сервера
-            int bytesRec = sender.Receive(bytes);
 
-            string answer = Encoding.UTF8.GetString(bytes, 0, bytesRec);
+            string block = null;
+            string answer = null;
+
+            int bytesRec = 0;
+
+            while (true)
+            {
+
+                bytesRec = sender.Receive(bytes);
+                block = Encoding.UTF8.GetString(bytes, 0, bytesRec);
+                answer += block;
+                if (answer.Contains("<TheEnd>")) break;
+            }
+
+            answer = answer.Remove(answer.Length - 8);
+
+            // Показываем данные на консоли
+            Console.Write("Полученный текст: " + answer + "\n\n");
 
             RequestM answerSep = JsonConvert.DeserializeObject<RequestM>(answer);
 

@@ -9,6 +9,10 @@ using System.Drawing;
 using System.Text;
 using System.IO;
 using Newtonsoft.Json;
+using System.Net;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Xml.Serialization;
 
 namespace workflow
 {
@@ -39,13 +43,20 @@ namespace workflow
         public string author;
         public string label;
         public int id;
+        public bool status;
 
-        public Documents(string _read, string _author, string _label, int _id)
+        public Documents(string _read, string _author, string _label, int _id, bool _status)
         {
             this.read = _read;
             this.author = _author;
             this.label = _label;
             this.id = _id;
+            this.status = _status;
+        }
+
+        public Documents()
+        {
+
         }
     }
 
@@ -65,6 +76,17 @@ namespace workflow
 
     public static class Server
     {
+
+        public static bool getUpdatesExistence()
+        {
+            string name = main_form.User.name;
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("name", main_form.User.name);
+            RequestM answer = SocketConnection.sendMessageFromSocket("getUpdateExistence", qParams);
+
+            return (bool)answer.parameters["updates"];
+        }
 
         public static void addNewChat()
         {
@@ -134,17 +156,69 @@ namespace workflow
 
         public static void downloadDocument(string document)
         {
-            Console.WriteLine("Download document " + document);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("name", main_form.User.name);
+            qParams.Add("id", document);
+            RequestM answer = SocketConnection.sendMessageFromSocket("downloadDocument", qParams);
+
+            string file = answer.parameters["file"] as string;
+            string type = answer.parameters["type"] as string;
+            string label = answer.parameters["label"] as string;
+
+            byte[] fileInBytes = Convert.FromBase64String(file);
+
+            if (!System.IO.Directory.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "files")))
+            {
+                Directory.CreateDirectory(System.IO.Path.Combine(Environment.CurrentDirectory, "files"));
+            }
+
+            Console.WriteLine("PATH : " + Environment.CurrentDirectory + "\\files\\" + label + type);
+
+            File.WriteAllBytes(Environment.CurrentDirectory + "\\files\\" + label + type, fileInBytes);
+
+            Process.Start(Environment.CurrentDirectory + "\\files\\" + label + type);
         }
 
         public static void downloadTemplate(string template)
         {
-            Console.WriteLine("Download template " + template);
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("id", template);
+            RequestM answer = SocketConnection.sendMessageFromSocket("downloadTemplate", qParams);
+
+            string file = answer.parameters["file"] as string;
+            string type = answer.parameters["type"] as string;
+            string label = answer.parameters["label"] as string;
+
+            byte[] fileInBytes = Convert.FromBase64String(file);
+
+            if (!System.IO.Directory.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "templates")))
+            {
+                Directory.CreateDirectory(System.IO.Path.Combine(Environment.CurrentDirectory, "templates"));
+            }
+
+            Console.WriteLine("PATH : " + Environment.CurrentDirectory + "\\templates\\" + label + type);
+
+            File.WriteAllBytes(Environment.CurrentDirectory + "\\templates\\" + label + type, fileInBytes);
+
+            Process.Start(Environment.CurrentDirectory + "\\templates\\" + label + type);
         }
 
-        public static void sendFile(string label, string path, string recipient)
+        public static void sendFile(string label, string path, Dictionary<string, bool> recipients)
         {
-            Console.WriteLine("Send file " + path + "(" + label + ")" + " to " + recipient);
+            //Console.WriteLine("Send file " + path + "(" + label + ")" + " to " + recipient);
+
+            Dictionary<string, object> qParams = new Dictionary<string, object>();
+            qParams.Add("label", label);
+            qParams.Add("recipients", JsonConvert.SerializeObject(recipients));
+
+            byte[] data = File.ReadAllBytes(path);
+            string file = Convert.ToBase64String(data);
+
+            qParams.Add("file", file);
+            qParams.Add("sender", main_form.User.name);
+            qParams.Add("type", "." + path.Split('.')[1]);
+
+            RequestM answer = SocketConnection.sendMessageFromSocket("sendFile", qParams);
         }
 
         public static void addTemplate(string name, string path)
@@ -155,12 +229,13 @@ namespace workflow
             Dictionary<string, object> qParams = new Dictionary<string, object>();
             qParams.Add("author", author);
             qParams.Add("name", name);
-            RequestM answer = SocketConnection.sendMessageFromSocket("addTemplate", qParams);
+            qParams.Add("type", "." + path.Split('.')[1]);
 
             byte[] data = File.ReadAllBytes(path);
             string file = Convert.ToBase64String(data);
 
             qParams.Add("file", file);
+            RequestM answer = SocketConnection.sendMessageFromSocket("addTemplate", qParams);
 
             Console.WriteLine("Add template " + name + " (" + path + ")");
         }
@@ -392,17 +467,102 @@ namespace workflow
     public class screenConstructor
     {
 
+        public static void setChatsLeftPanel(workflow.main_form connectForm)
+        {
+            List<string> labelLeftChats = new List<string>() { "Беседы: " };
+            List<string> conversationNames = new List<string>();
+            List<string> labelLeftChatsAfter = new List<string>() { "+ Добавить беседу" };
+            List<string> filledLeftChatsNames = new List<string>();
+
+            Server.updateUsersConversations();
+
+            foreach (var item in main_form.User.conversations)
+            {
+                conversationNames.Add(item.name);
+                filledLeftChatsNames.Add(item.id.ToString());
+            }
+
+            List<string> contentLeftChats = conversationNames;
+
+            List<string> filledLeftChats = new List<string>();
+
+            if (!(contentLeftChats is null) && contentLeftChats.Count() > 0)
+            {
+                filledLeftChats = labelLeftChats.Concat(contentLeftChats).Concat(labelLeftChatsAfter).ToList();
+            }
+            else
+            {
+                filledLeftChats = labelLeftChats.Concat(labelLeftChatsAfter).ToList();
+            }
+
+            Dictionary<int, ContentAlignment> propertiesLeftChats = new Dictionary<int, ContentAlignment>(filledLeftChats.Count());
+
+            propertiesLeftChats.Add(0, ContentAlignment.MiddleCenter);
+            propertiesLeftChats.Add(filledLeftChats.Count() - 1, ContentAlignment.MiddleCenter);
+
+            customBox.addElements(filledLeftChats, propertiesLeftChats, connectForm.a_main_screen_left_panel_custom_box, connectForm, "chats", filledLeftChatsNames);
+        }
+
+        public static void setDocumentsLeftPanel(workflow.main_form connectForm)
+        {
+            List<string> filledLeftDocuments = new List<string>() { "Отправить документ", "Входящие документы", "Шаблоны документов" };
+            List<string> filledLeftDocumentsNames = new List<string>() { "a_send_message_button", "a_incoming_messages_button", "a_document_templates_button" };
+
+            Dictionary<int, ContentAlignment> propertiesLeftDocuments = new Dictionary<int, ContentAlignment>(filledLeftDocuments.Count());
+
+            propertiesLeftDocuments.Add(0, ContentAlignment.MiddleCenter);
+            propertiesLeftDocuments.Add(1, ContentAlignment.MiddleCenter);
+            propertiesLeftDocuments.Add(2, ContentAlignment.MiddleCenter);
+
+            customBox.addElements(filledLeftDocuments, propertiesLeftDocuments, connectForm.a_main_screen_left_panel_custom_box, connectForm, "documents", filledLeftDocumentsNames);
+        }
+
+        public static void setMainLeftPanel(workflow.main_form connectForm)
+        {
+
+            connectForm.currentUnderEnvironment = "main";
+
+            List<string> labelLeftMain = new List<string>() { "Расписание: " };
+            List<string> contentLeftMain = main_form.User.shedule;
+
+            List<string> filledLeftMain = new List<string>();
+
+            if (!(contentLeftMain is null) && contentLeftMain.Count() > 0)
+            {
+                filledLeftMain = labelLeftMain.Concat(contentLeftMain).ToList();
+            }
+            else
+            {
+                filledLeftMain = labelLeftMain;
+            }
+
+            Dictionary<int, ContentAlignment> propertiesLeftMain = new Dictionary<int, ContentAlignment>(filledLeftMain.Count());
+
+            propertiesLeftMain.Add(0, ContentAlignment.MiddleCenter);
+
+            customBox.addElements(filledLeftMain, propertiesLeftMain, connectForm.a_main_screen_left_panel_custom_box, connectForm, "main");
+        }
+
         public static void setDocumentsMainScreenVersion(string senderButton, workflow.main_form connectForm)
         {
+
+            connectForm.currentUnderEnvironment = senderButton;
+
             cleanMainScreenEnvironment(connectForm, false);
 
             resetDocumentsLeftPanelButtonsColors(senderButton, connectForm);
+
+            connectForm.a_dark_background.Visible = false;
 
             switch (senderButton)
             {
                 case "a_incoming_messages_button":
 
-                    List<Documents> labelDocuments = new List<Documents>() { new Documents("Cтатус", "Автор", "Тема", 0) };
+                    Server.getTemplates();
+
+                    connectForm.stopUpdatingMode = false;
+
+                    List<Documents> labelDocuments = new List<Documents>() { new Documents("Cтатус", "Автор", "Тема", 0, false) };
                     List<Documents> contentDocuments = Server.getDocuments();
 
                     List<Documents> filledDocuments = new List<Documents>();
@@ -426,6 +586,8 @@ namespace workflow
 
                 case "a_send_message_button":
 
+                    connectForm.stopUpdatingMode = true;
+
                     connectForm.a_main_screen_main_box_add_file_panel_info_label.Text = "";
                     connectForm.a_main_screen_main_box_add_file_panel_label_text_box.Text = "";
                     connectForm.a_main_screen_main_box_add_file_panel_file_name_label.Text = "";
@@ -442,6 +604,8 @@ namespace workflow
                     break;
 
                 case "a_document_templates_button":
+
+                    connectForm.stopUpdatingMode = false;
 
                     if (main_form.User.getPrivilege("addTemplates"))
                     {
@@ -472,11 +636,11 @@ namespace workflow
             }
         }
 
-        public static void setChatsMainScreenVersion(string senderButton, workflow.main_form connectForm)
+        public static void setChatsMainScreenVersion(string senderButton, workflow.main_form connectForm, bool isUserCalledUpdate, bool alreadySetId = false)
         {
+            connectForm.currentUnderEnvironment = senderButton;
 
-
-            main_form.User.currentConversationId = senderButton;
+            if(!alreadySetId) main_form.User.currentConversationId = senderButton;
             Console.WriteLine("ID : " + senderButton);
 
             cleanMainScreenEnvironment(connectForm, false);
@@ -502,8 +666,45 @@ namespace workflow
             List<Message> messagesInDialog = currentConversation.messages;
 
             int yPosition = mainBox.addElementsChats(messagesInDialog, currentConversation, connectForm.a_main_screen_main_box_chats_mode_main_panel, connectForm);
+            main_form.maxPrevScrollValue = yPosition;
 
-            connectForm.a_main_screen_main_box_chats_mode_main_panel.AutoScrollPosition = new Point(0, yPosition);
+            if (isUserCalledUpdate)
+            {
+                connectForm.a_main_screen_main_box_chats_mode_main_panel.AutoScrollPosition = new Point(0, yPosition);
+            }
+            else
+            {
+                connectForm.a_main_screen_main_box_chats_mode_main_panel.AutoScrollPosition = new Point(0, main_form.systemScrollPosition);
+            }
+        }
+
+        public static void setMainScreenVersion(workflow.main_form connectForm)
+        {
+
+            if (main_form.User.getPrivilege("addNews"))
+            {
+                connectForm.a_main_screen_main_box_add_news_button.Visible = true;
+            }
+
+            List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации", 0) };
+            List<News> contentMain = Server.getNews();
+
+            List<News> filledMain = new List<News>();
+
+            if (!(contentMain is null) && contentMain.Count() > 0)
+            {
+                filledMain = labelMain.Concat(contentMain).ToList();
+            }
+            else
+            {
+                filledMain = labelMain;
+            }
+
+            Dictionary<int, Color> propertiesMain = new Dictionary<int, Color>(filledMain.Count());
+
+            propertiesMain.Add(0, SystemColors.ControlLight);
+
+            mainBox.addElementsMain(filledMain, propertiesMain, connectForm.a_main_screen_main_box, connectForm);
         }
 
         public static void setBox(Panel box, workflow.main_form connectForm)
@@ -638,10 +839,14 @@ namespace workflow
             connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = false;
         }
 
-        public static void changeMainScreenEnvironment(string environment, workflow.main_form connectForm)
+        public static void changeMainScreenEnvironment(string environment, workflow.main_form connectForm, string underEnvironment = null)
         {
 
+            if (!(underEnvironment is null) && connectForm.stopUpdatingMode) return;
+
             cleanMainScreenEnvironment(connectForm);
+
+            connectForm.currentEnvironment = environment;
 
             switch (environment)
             {
@@ -651,78 +856,37 @@ namespace workflow
 
                     //--------------------------- left screen changes
 
-                    List<string> labelLeftMain = new List<string>() { "Расписание: " };
-                    List<string> contentLeftMain = main_form.User.shedule;
-
-                    List<string> filledLeftMain = new List<string>();
-
-                    if (!(contentLeftMain is null) && contentLeftMain.Count() > 0)
-                    {
-                        filledLeftMain = labelLeftMain.Concat(contentLeftMain).ToList();
-                    }
-                    else
-                    {
-                        filledLeftMain = labelLeftMain;
-                    }
-
-                    Dictionary<int, ContentAlignment> propertiesLeftMain = new Dictionary<int, ContentAlignment>(filledLeftMain.Count());
-
-                    propertiesLeftMain.Add(0, ContentAlignment.MiddleCenter);
-
-                    customBox.addElements(filledLeftMain, propertiesLeftMain, connectForm.a_main_screen_left_panel_custom_box, connectForm, environment);
-
-                    if (main_form.User.getPrivilege("addNews"))
-                    {
-                        connectForm.a_main_screen_main_box_add_news_button.Visible = true;
-                    }
+                    //screenConstructor.setMainLeftPanel(connectForm);
 
                     //--------------------------- main screen changes
 
-                    List<News> labelMain = new List<News>() { new News("Автор", "Тема", "Cодержание", "Время публикации", 0) };
-                    List<News> contentMain = Server.getNews();
-
-                    List<News> filledMain = new List<News>();
-
-                    if (!(contentMain is null) && contentMain.Count() > 0)
-                    {
-                        filledMain = labelMain.Concat(contentMain).ToList();
-                    }
-                    else
-                    {
-                        filledMain = labelMain;
-                    }
-
-                    Dictionary<int, Color> propertiesMain = new Dictionary<int, Color>(filledMain.Count());
-
-                    propertiesMain.Add(0, SystemColors.ControlLight);
-
-                    mainBox.addElementsMain(filledMain, propertiesMain, connectForm.a_main_screen_main_box, connectForm);
+                    screenConstructor.setMainScreenVersion(connectForm);
 
                     Console.WriteLine("Change environment : main");
                     break;
 
                 case "documents":
 
-                    main_form.User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
-
                     resetTopPanelButtonsColors(connectForm.a_main_screen_top_panel_button2_text, connectForm);
 
                     //--------------------------- left screen changes
 
-                    List<string> filledLeftDocuments = new List<string>() { "Отправить документ", "Входящие документы", "Шаблоны документов" };
-                    List<string> filledLeftDocumentsNames = new List<string>() { "a_send_message_button", "a_incoming_messages_button", "a_document_templates_button" };
-
-                    Dictionary<int, ContentAlignment> propertiesLeftDocuments = new Dictionary<int, ContentAlignment>(filledLeftDocuments.Count());
-
-                    propertiesLeftDocuments.Add(0, ContentAlignment.MiddleCenter);
-                    propertiesLeftDocuments.Add(1, ContentAlignment.MiddleCenter);
-                    propertiesLeftDocuments.Add(2, ContentAlignment.MiddleCenter);
-
-                    customBox.addElements(filledLeftDocuments, propertiesLeftDocuments, connectForm.a_main_screen_left_panel_custom_box, connectForm, environment, filledLeftDocumentsNames);
+                    //if(underEnvironment is null) //Если смена, а не обновление с сервера
+                    //{
+                        main_form.User.systemData.Clear(); //Очищаем указатели на кнопки с прошлой сессии
+                        screenConstructor.setDocumentsLeftPanel(connectForm);
+                    //}
 
                     //--------------------------- main screen changes
 
-                    screenConstructor.setDocumentsMainScreenVersion("a_incoming_messages_button", connectForm);
+                    if(underEnvironment is null)
+                    {
+                        screenConstructor.setDocumentsMainScreenVersion("a_incoming_messages_button", connectForm);
+                    }
+                    else
+                    {
+                        screenConstructor.setDocumentsMainScreenVersion(underEnvironment, connectForm);
+                    }
 
                     Console.WriteLine("Change environment : documents");
                     break;
@@ -735,46 +899,35 @@ namespace workflow
 
                     //--------------------------- left screen changes
 
-                    List<string> labelLeftChats = new List<string>() { "Беседы: " };
-                    List<string> conversationNames = new List<string>();
-                    List<string> labelLeftChatsAfter = new List<string>() { "+ Добавить беседу" };
-                    List<string> filledLeftChatsNames = new List<string>();
-
-                    Server.updateUsersConversations();
-
-                    foreach (var item in main_form.User.conversations){
-                        conversationNames.Add(item.name);
-                        filledLeftChatsNames.Add(item.id.ToString());
-                    }
-
-                    List<string> contentLeftChats = conversationNames;
-
-                    List<string> filledLeftChats = new List<string>();
-
-                    if (!(contentLeftChats is null) && contentLeftChats.Count() > 0)
-                    {
-                        filledLeftChats = labelLeftChats.Concat(contentLeftChats).Concat(labelLeftChatsAfter).ToList();
-                    }
-                    else
-                    {
-                        filledLeftChats = labelLeftChats.Concat(labelLeftChatsAfter).ToList();
-                    }
-
-                    Dictionary<int, ContentAlignment> propertiesLeftChats = new Dictionary<int, ContentAlignment>(filledLeftChats.Count());
-
-                    propertiesLeftChats.Add(0, ContentAlignment.MiddleCenter);
-                    propertiesLeftChats.Add(filledLeftChats.Count() - 1, ContentAlignment.MiddleCenter);
-
-                    customBox.addElements(filledLeftChats, propertiesLeftChats, connectForm.a_main_screen_left_panel_custom_box, connectForm, environment, filledLeftChatsNames);
+                    screenConstructor.setChatsLeftPanel(connectForm);
 
                     //--------------------------- main screen changes
 
                     connectForm.a_main_screen_main_box_chats_mode_interface_panel.Visible = true;
                     connectForm.a_main_screen_main_box_chats_mode_main_panel.Visible = true;
 
-                    if(main_form.User.conversations.Count() > 0)
+                    if (main_form.User.conversations.Count() > 0)
                     {
-                        screenConstructor.setChatsMainScreenVersion(main_form.User.conversations[0].id.ToString(), connectForm);
+                        if(underEnvironment is null)
+                        {
+                            screenConstructor.setChatsMainScreenVersion(main_form.User.conversations[0].id.ToString(), connectForm, true);
+                        }
+                        else
+                        {
+                            main_form.systemScrollPosition = connectForm.a_main_screen_main_box_chats_mode_main_panel.VerticalScroll.Value;
+
+                            Console.WriteLine("BOX HEIGHT = " + (main_form.maxPrevScrollValue - connectForm.a_main_screen_main_box_chats_mode_main_panel.Size.Height).ToString());
+                            Console.WriteLine("SCROLL POS = " + main_form.systemScrollPosition.ToString());
+
+                            if (main_form.systemScrollPosition > main_form.maxPrevScrollValue - connectForm.a_main_screen_main_box_chats_mode_main_panel.Size.Height - 5) //Если мы итак внизу - перекидывать
+                            {
+                                screenConstructor.setChatsMainScreenVersion(underEnvironment, connectForm, true, true);
+                            }
+                            else
+                            {
+                                screenConstructor.setChatsMainScreenVersion(underEnvironment, connectForm, false, true);
+                            }
+                        }
                     }
 
                     Console.WriteLine("Change environment : chats");
@@ -1043,7 +1196,7 @@ namespace workflow
                 int xPositionIncide = 0;
 
                 Label read = new Label();
-                read.Text = elements[num].read;
+                read.Text = elements[num].status ? "Прочитано" : "Новое";
                 widthOfElementIncide = widthOfElements / 10 * 2;
                 heightOfElementIncide = element.Size.Height;
                 read.Size = new Size(widthOfElementIncide, heightOfElementIncide);

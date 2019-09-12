@@ -16,7 +16,16 @@ namespace workflow
     public partial class main_form : Form
     {
 
+        public bool stopUpdatingMode = false;
+        public string currentEnvironment;
+        public string currentUnderEnvironment;
         static public UserClass User = new UserClass();
+
+        //remember
+        static public int systemScrollPosition;
+        static public int maxPrevScrollValue;
+
+        // / remember
 
         public main_form()
         {
@@ -58,9 +67,13 @@ namespace workflow
 
                 this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
                 System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-                timer.Interval = (1 * 1000); // 10 secs
-                timer.Tick += new EventHandler(timer_Tick);
-                timer.Start();
+                timer2.Interval = (1 * 1000); // 1 secs
+                timer2.Tick += new EventHandler(timer_Tick);
+                timer2.Start();
+
+                timer1.Interval = (1 * 1000);
+                timer1.Tick += new EventHandler(updateFormByServer);
+                timer1.Start();
             }
             else
             {
@@ -88,9 +101,13 @@ namespace workflow
 
                 this.a_main_screen_left_panel_time.Text = DateTime.Now.ToString("h:mm:ss tt"); //Обновляем значение времени
                 System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-                timer.Interval = (1 * 1000); // 10 secs
-                timer.Tick += new EventHandler(timer_Tick);
-                timer.Start();
+                timer2.Interval = (1 * 1000); // 10 secs
+                timer2.Tick += new EventHandler(timer_Tick);
+                timer2.Start();
+
+                timer1.Interval = (1 * 1000);
+                timer1.Tick += new EventHandler(updateFormByServer);
+                timer1.Start();
 
                 screenConstructor.changeBoxes(this.a_sign_in_box, this.a_main_screen_box, this);
             }
@@ -190,6 +207,7 @@ namespace workflow
 
         private void a_change_image_set(object sender, CancelEventArgs e)
         {
+            stopUpdatingMode = false;
             Console.WriteLine("Image set by user : " + this.a_change_image_dialog.FileName);
             User.set_photo(this.a_change_image_dialog.FileName, this);
         }
@@ -226,6 +244,7 @@ namespace workflow
 
         public void a_add_news_button_click(object sender, EventArgs e)
         {
+            stopUpdatingMode = true;
             Console.WriteLine("Add news");
             a_main_screen_main_box_add_news_panel_info_label.Text = "";
             a_main_screen_main_box_add_news_panel_news_content_text_box.Text = "";
@@ -260,6 +279,7 @@ namespace workflow
         {
             a_main_screen_main_box_add_news_panel.Visible = false;
             a_dark_background.Visible = false;
+            stopUpdatingMode = false;
         }
 
         public void a_deleteNews_button_click(object sender, EventArgs e)
@@ -272,6 +292,7 @@ namespace workflow
 
         private void a_change_main_news_button_click(object sender, EventArgs e)
         {
+            stopUpdatingMode = true;
             a_main_screen_main_box_change_news_panel.Visible = true;
             a_dark_background.Visible = true;
             a_main_screen_main_box_change_news_panel_news_content_text_box.Text = a_main_screen_main_info_panel_text.Text;
@@ -279,6 +300,7 @@ namespace workflow
 
         private void a_exit_change_news_panel(object sender, EventArgs e)
         {
+            stopUpdatingMode = false;
             a_dark_background.Visible = false;
             a_main_screen_main_box_change_news_panel.Visible = false;
         }
@@ -288,6 +310,7 @@ namespace workflow
             string content_of_news = a_main_screen_main_box_change_news_panel_news_content_text_box.Text;
             Server.changeMainNews(content_of_news);
             a_main_screen_main_box_change_news_panel.Visible = false;
+            a_dark_background.Visible = false;
         }
 
         public void a_documents_left_panel_button_click(object sender, EventArgs e)
@@ -309,6 +332,7 @@ namespace workflow
 
         private void a_exit_add_file_panel(object sender, EventArgs e)
         {
+            stopUpdatingMode = false;
             a_main_screen_main_box_add_file_panel.Visible = false;
             a_dark_background.Visible = false;
         }
@@ -328,12 +352,32 @@ namespace workflow
             string fileLabel = a_main_screen_main_box_add_file_panel_label_text_box.Text;
             string fileName = a_send_file_dialog.FileName;
 
+            if (fileName.Split('.').Length > 2)
+            {
+                a_main_screen_main_box_add_file_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_file_panel_info_label.Text = "Нельзя отправлять на сервер файлы, в имени которых содержатся точки";
+                return;
+            }
+
+            char[] forbittenSymbols = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+
+            if (fileLabel.IndexOfAny(forbittenSymbols) != -1){
+                a_main_screen_main_box_add_file_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_file_panel_info_label.Text = "Нельзя отправлять на сервер файлы, c именем, содержащим спец. символы";
+                return;
+            }
+
             if(fileLabel != "" && fileName != "a_selected_file")
             {
+
+                Dictionary<string, bool> recipients = new Dictionary<string, bool>();
+
                 foreach (var item in a_main_screen_main_box_add_file_panel_recipients_list_box.SelectedItems)
                 {
-                    Server.sendFile(fileLabel, fileName, item.ToString());
+                    recipients.Add(item.ToString(), false);
                 }
+
+                Server.sendFile(fileLabel, fileName, recipients);
 
                 a_main_screen_main_box_add_file_panel_info_label.ForeColor = Color.Green;
                 a_main_screen_main_box_add_file_panel_info_label.Text = "Успешно отправлено";
@@ -361,7 +405,7 @@ namespace workflow
 
         private void a_add_template_button_click(object sender, EventArgs e)
         {
-
+            stopUpdatingMode = true;
             a_main_screen_main_box_add_template_panel_info_label.Text = "";
             a_main_screen_main_box_add_template_panel_name_text_box.Text = "";
             a_main_screen_main_box_add_template_panel_file_name_label.Text = "";
@@ -372,6 +416,7 @@ namespace workflow
 
         private void a_exit_add_template_panel(object sender, EventArgs e)
         {
+            stopUpdatingMode = false;
             a_main_screen_main_box_add_template_panel.Visible = false;
             a_dark_background.Visible = false;
         }
@@ -385,6 +430,22 @@ namespace workflow
         {
             string templateLabel = a_main_screen_main_box_add_template_panel_name_text_box.Text;
             string templateName = a_send_template_dialog.FileName;
+
+            if (templateName.Split('.').Length > 2)
+            {
+                a_main_screen_main_box_add_template_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_template_panel_info_label.Text = "Нельзя отправлять на сервер файлы, в имени которых содержатся точки";
+                return;
+            }
+
+            char[] forbittenSymbols = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+
+            if (templateLabel.IndexOfAny(forbittenSymbols) != -1)
+            {
+                a_main_screen_main_box_add_template_panel_info_label.ForeColor = Color.Red;
+                a_main_screen_main_box_add_template_panel_info_label.Text = "Нельзя отправлять на сервер файлы, c именем, содержащим спец. символы";
+                return;
+            }
 
             if (templateLabel != "" && templateName != "a_selected_file")
             {
@@ -423,7 +484,7 @@ namespace workflow
             Label senderLabel = sender as Label;
             string senderButton = senderLabel.Tag.ToString();
 
-            screenConstructor.setChatsMainScreenVersion(senderButton, this);
+            screenConstructor.setChatsMainScreenVersion(senderButton, this, true);
         }
 
         private void chats_mode_send_button_click(object sender, EventArgs e)
@@ -431,10 +492,13 @@ namespace workflow
             string text = a_main_screen_main_box_chats_mode_interface_panel_text_box.Text;
             a_main_screen_main_box_chats_mode_interface_panel_text_box.Text = "";
             Server.sendMessage(text);
+            updateFormByServer(null, null);
+            stopUpdatingMode = false;
         }
 
         public void conversation_options_open(object sender, EventArgs e)
         {
+            stopUpdatingMode = true;
             Label senderLabel = sender as Label;
             a_conversation_options_panel.Visible = true;
             a_conversation_options_panel.BringToFront();
@@ -452,6 +516,7 @@ namespace workflow
 
         private void a_conversation_options_panel_exit(object sender, EventArgs e)
         {
+            stopUpdatingMode = false;
             a_conversation_options_panel.Visible = false;
         }
 
@@ -466,17 +531,60 @@ namespace workflow
             }
 
             a_conversation_options_panel.Visible = false;
+            stopUpdatingMode = false;
         }
 
         private void a_conversation_options_panel_leave_conversation(object sender, EventArgs e)
         {
+            stopUpdatingMode = false;
             Server.leaveConversation(User.currentConversationId);
+            Server.updateUsersConversations();
+
+            if (User.conversations.Count > 0) User.currentConversationId = User.conversations[0].id.ToString();
+
             a_conversation_options_panel.Visible = false;
         }
 
         public void a_chats_left_panel_add_chat_button_click(object sender, EventArgs e)
         {
             Server.addNewChat();
+            Server.updateUsersConversations();
+            if (User.conversations.Count > 0) User.currentConversationId = User.conversations[0].id.ToString();
+        }
+
+        public void updateFormByServer(object sender, EventArgs e)
+        {
+            if (Server.getUpdatesExistence())
+            {
+                Console.WriteLine("updateFormByServer");
+                a_main_screen_main_info_panel_text.Text = Server.getMainNews();
+
+                screenConstructor.changeMainScreenEnvironment(currentEnvironment, this, currentUnderEnvironment);
+            }
+            else
+            {
+                Console.WriteLine("noUpdates");
+            }
+        }
+
+        private void a_chats_mode_message_writing(object sender, EventArgs e)
+        {
+           // stopUpdatingMode = true;
+        }
+
+        private void a_chats_mode_message_stop_writing(object sender, EventArgs e)
+        {
+            // stopUpdatingMode = false;
+        }
+
+        private void exit_from_global_user(object sender, EventArgs e)
+        {
+            timer1.Stop();
+            timer2.Stop();
+
+            screenConstructor.setBox(a_sign_in_box, this);
+
+            File.Delete(System.IO.Path.Combine(Environment.CurrentDirectory, "safe.txt"));
         }
     }
 }

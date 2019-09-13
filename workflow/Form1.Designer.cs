@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main_form));
             this.a_sign_in_box = new System.Windows.Forms.GroupBox();
             this.a_sign_in_info_box = new System.Windows.Forms.Label();
             this.a_sign_in_forgot_password_button = new System.Windows.Forms.Label();
@@ -52,6 +53,7 @@
             this.a_forgot_password_login_label = new System.Windows.Forms.Label();
             this.a_forgot_password_login_text_box = new System.Windows.Forms.TextBox();
             this.a_main_screen_box = new System.Windows.Forms.Panel();
+            this.a_exit_user_button = new System.Windows.Forms.Label();
             this.a_main_screen_main_box = new System.Windows.Forms.Panel();
             this.a_conversation_options_panel = new System.Windows.Forms.Panel();
             this.a_conversation_options_panel_add_users_list_box = new System.Windows.Forms.ListBox();
@@ -127,7 +129,6 @@
             this.a_send_file_dialog = new System.Windows.Forms.OpenFileDialog();
             this.a_send_template_dialog = new System.Windows.Forms.OpenFileDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.a_exit_user_button = new System.Windows.Forms.Label();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.a_sign_in_box.SuspendLayout();
             this.a_sign_up_box.SuspendLayout();
@@ -390,6 +391,19 @@
             this.a_main_screen_box.Name = "a_main_screen_box";
             this.a_main_screen_box.Size = new System.Drawing.Size(1002, 604);
             this.a_main_screen_box.TabIndex = 3;
+            // 
+            // a_exit_user_button
+            // 
+            this.a_exit_user_button.AutoSize = true;
+            this.a_exit_user_button.BackColor = System.Drawing.Color.Black;
+            this.a_exit_user_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.a_exit_user_button.ForeColor = System.Drawing.Color.White;
+            this.a_exit_user_button.Location = new System.Drawing.Point(0, 0);
+            this.a_exit_user_button.Name = "a_exit_user_button";
+            this.a_exit_user_button.Size = new System.Drawing.Size(39, 13);
+            this.a_exit_user_button.TabIndex = 3;
+            this.a_exit_user_button.Text = "Выйти";
+            this.a_exit_user_button.Click += new System.EventHandler(this.exit_from_global_user);
             // 
             // a_main_screen_main_box
             // 
@@ -1201,32 +1215,21 @@
             this.a_send_template_dialog.FileName = "a_selected_file";
             this.a_send_template_dialog.FileOk += new System.ComponentModel.CancelEventHandler(this.a_select_template_set);
             // 
-            // a_exit_user_button
-            // 
-            this.a_exit_user_button.AutoSize = true;
-            this.a_exit_user_button.BackColor = System.Drawing.Color.Black;
-            this.a_exit_user_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.a_exit_user_button.ForeColor = System.Drawing.Color.White;
-            this.a_exit_user_button.Location = new System.Drawing.Point(0, 0);
-            this.a_exit_user_button.Name = "a_exit_user_button";
-            this.a_exit_user_button.Size = new System.Drawing.Size(39, 13);
-            this.a_exit_user_button.TabIndex = 3;
-            this.a_exit_user_button.Text = "Выйти";
-            this.a_exit_user_button.Click += new System.EventHandler(this.exit_from_global_user);
-            // 
             // main_form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(998, 599);
+            this.ClientSize = new System.Drawing.Size(994, 597);
             this.Controls.Add(this.a_main_screen_box);
             this.Controls.Add(this.a_sign_in_box);
             this.Controls.Add(this.a_sign_up_box);
             this.Controls.Add(this.a_forgot_password_box);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "main_form";
-            this.ShowIcon = false;
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "ELMA";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.a_sign_in_box.ResumeLayout(false);

@@ -1196,7 +1196,14 @@ namespace workflow
                 int xPositionIncide = 0;
 
                 Label read = new Label();
-                read.Text = elements[num].status ? "Прочитано" : "Новое";
+                if(num == 0) //Первый элемент
+                {
+                    read.Text = elements[num].read;
+                }
+                else
+                {
+                    read.Text = elements[num].status ? "Прочитано" : "Новое";
+                }
                 widthOfElementIncide = widthOfElements / 10 * 2;
                 heightOfElementIncide = element.Size.Height;
                 read.Size = new Size(widthOfElementIncide, heightOfElementIncide);

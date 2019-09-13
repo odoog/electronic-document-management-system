@@ -1,0 +1,15 @@
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\workflow_server.exe.config
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\workflow_server.exe
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\workflow_server.pdb
+C:\Users\User\Desktop\workflow_server\workflow_server\obj\Debug\workflow_server.csprojAssemblyReference.cache
+C:\Users\User\Desktop\workflow_server\workflow_server\obj\Debug\workflow_server.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\workflow_server\workflow_server\obj\Debug\workflow_server.exe
+C:\Users\User\Desktop\workflow_server\workflow_server\obj\Debug\workflow_server.pdb
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\MySql.Data.dll
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\Google.Protobuf.dll
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\Renci.SshNet.dll
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\BouncyCastle.Crypto.dll
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\MySql.Data.xml
+C:\Users\User\Desktop\workflow_server\workflow_server\obj\Debug\workflow_server.csproj.CopyComplete
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\Newtonsoft.Json.dll
+C:\Users\User\Desktop\workflow_server\workflow_server\bin\Debug\Newtonsoft.Json.xml

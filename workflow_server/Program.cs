@@ -594,7 +594,9 @@ namespace SocketServer
                     {
                         List<string> usersInConversation = JsonConvert.DeserializeObject<List<string>>(reader[3].ToString());
 
-                        usersInConversation.Add(userName);
+                        if (!(usersInConversation.Contains(userName))){
+                            usersInConversation.Add(userName);
+                        }
 
                         mysql.q($"UPDATE conversations SET users='{JsonConvert.SerializeObject(usersInConversation)}' WHERE id={id}");
 

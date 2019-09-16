@@ -14,7 +14,8 @@ namespace workflow
 {
     class SocketConnection
     {
-        public static int port = 11000;
+        public static int port;
+        public static string host;
 
         static public RequestM sendMessageFromSocket(string name, Dictionary<string, object> qParams)
         {
@@ -23,8 +24,20 @@ namespace workflow
 
             // Соединяемся с удаленным устройством
 
+            using (FileStream fstream = new FileStream(System.IO.Path.Combine(Environment.CurrentDirectory, "socketConfig.txt"), FileMode.OpenOrCreate))
+            {
+                byte[] array = new byte[fstream.Length];
+                // считываем данные
+                fstream.Read(array, 0, array.Length);
+                // декодируем байты в строку
+                string textFromFile = System.Text.Encoding.Default.GetString(array);
+                string[] configInfo = textFromFile.Split(new char[] { ';' });
+                host = configInfo[0];
+                port = Int32.Parse(configInfo[1]);
+            }
+
             // Устанавливаем удаленную точку для сокета
-            IPHostEntry ipHost = Dns.GetHostEntry("localhost");
+            IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, port);
 

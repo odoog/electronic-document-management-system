@@ -35,10 +35,25 @@ namespace SocketServer
 
             mysql.conn = conn;
 
+            string ipAddressFile;
+            int portFile;
+
+            using (FileStream fstream = new FileStream(System.IO.Path.Combine(Environment.CurrentDirectory, "socketConfig.txt"), FileMode.OpenOrCreate))
+            {
+                byte[] array = new byte[fstream.Length];
+                // считываем данные
+                fstream.Read(array, 0, array.Length);
+                // декодируем байты в строку
+                string textFromFile = System.Text.Encoding.Default.GetString(array);
+                string[] configInfo = textFromFile.Split(new char[] { ';' });
+                ipAddressFile = configInfo[0];
+                portFile = Int32.Parse(configInfo[1]);
+            }
+
             // Устанавливаем для сокета локальную конечную точку
-            IPHostEntry ipHost = Dns.GetHostEntry("localhost");
+            IPHostEntry ipHost = Dns.GetHostEntry(ipAddressFile);
             IPAddress ipAddr = ipHost.AddressList[0];
-            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
+            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, portFile);
 
             // Создаем сокет Tcp/Ip
             Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
